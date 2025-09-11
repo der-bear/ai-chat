@@ -162,9 +162,26 @@ export class AgentRouter {
       return true;
     }
 
-    // If in active workflow, ALWAYS prioritize workflow execution - NO interruptions
+    // If in active workflow, allow help for EXPLICIT questions only, not data provision
     if (inWorkflow) {
-      return false;
+      // Allow help for explicit documentation questions like "what is webhook"
+      const explicitHelpQuestions = lowerMessage.startsWith('what is ') || 
+                                   lowerMessage.startsWith('what are ') ||
+                                   lowerMessage.startsWith('what does ') ||
+                                   lowerMessage.startsWith('how does ') ||
+                                   lowerMessage.startsWith('explain ') ||
+                                   lowerMessage.includes('documentation');
+      
+      // If providing data (company name, details, etc.) - NEVER route to help
+      const isProvidingData = lowerMessage.length > 10 && 
+                             !lowerMessage.includes('?') &&
+                             !explicitHelpQuestions;
+      
+      if (isProvidingData) {
+        return false; // Stay in workflow for data provision
+      }
+      
+      return explicitHelpQuestions; // Allow help only for explicit questions
     }
 
     // Check for help question patterns
