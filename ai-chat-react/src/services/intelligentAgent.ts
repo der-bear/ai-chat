@@ -9,6 +9,7 @@ export interface AgentResponse {
     text: string;
     value?: string;
   }>;
+  mode?: 'processing_start' | 'final';
 }
 
 export interface ConversationState {
@@ -208,9 +209,38 @@ Current state: ${JSON.stringify(this.conversationState)}
 COMPLETE WORKFLOW SPECIFICATION:
 ${this.clientCreateFlow}
 
+CONTROL OUTPUT INSTRUCTIONS (append to every reply):
+- After your visible reply, append a single control block with JSON only, wrapped in <CONTROL>...</CONTROL> tags.
+- Schema:
+  {
+    "suggested_actions": Array<{"id": string, "text": string, "value?": string}>,
+    "conversation_state": {"activeWorkflow?": string, "workflowStep?": string, "collectedData?": Record<string, unknown>},
+    "mode": "processing_start" | "final"
+  }
+- Use empty array/object when not applicable. Do not include any extra keys.
+- Set "mode":"processing_start" only when you are signaling that you are starting processing (e.g., "I'm creating ... now:"). Use "final" in all other replies.
+- When completing an entity creation, the completion message must contain ONLY a single line: "Client/Delivery/Account created successfully: [Entity Name (ID: 12345)](#)".
+
+Example:
+<CONTROL>{"suggested_actions":[{"id":"proceed","text":"Yes, proceed"}],"conversation_state":{"workflowStep":"confirmation"},"mode":"final"}</CONTROL>
+
 **EXECUTE PERFECT UNIVERSAL WORKFLOWS WITH GUARANTEED CONSISTENCY**`
         }
       ];
+
+      // Inject RAG context (best-effort). If no index available, this yields [] and is skipped.
+      try {
+        const topChunks = await this.rag.queryTopK(message, 3);
+        if (topChunks && topChunks.length > 0) {
+          const context = topChunks.map((c, i) => `[#${i + 1}] source: ${c.source}\n${c.text}`).join('\n\n');
+          messages.push({
+            role: 'system',
+            content: `Context snippets (use for grounding; do not quote verbatim URLs/keys):\n${context}`
+          });
+        }
+      } catch {
+        // Non-fatal: proceed without RAG
+      }
 
       messages.push(...conversationHistory.map(msg => ({
         role: msg.role === 'user' ? 'user' as const : 'assistant' as const,
@@ -232,19 +262,78 @@ ${this.clientCreateFlow}
 
       let content = response.content || 'I\'m ready to help you with client setup!';
 
+      // Try to extract control block (<CONTROL>{...}</CONTROL>) for structured data
+      const control = this.parseControlBlock(content);
+      if (control) {
+        content = control.cleanContent;
+        if (control.conversationState) {
+          this.conversationState = { ...this.conversationState, ...control.conversationState };
+        }
+        // Prefer structured suggested actions if provided
+        const suggestedActions = control.suggestedActions && control.suggestedActions.length > 0
+          ? control.suggestedActions
+          : this.generateSuggestedActions(content);
+
+        return {
+          content,
+          conversationState: this.conversationState,
+          suggestedActions,
+          mode: control.mode || 'final'
+        };
+      }
+
       // Generate suggested actions for valid choice scenarios
       const suggestedActions = this.generateSuggestedActions(content);
 
       return {
         content,
         conversationState: this.conversationState,
-        suggestedActions
+        suggestedActions,
+        mode: 'final'
       };
 
     } catch (error) {
       console.error('Intelligent Agent Error:', error);
       throw new Error(`Failed to get response: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
+  }
+
+  // Extracts a JSON control block appended to the model output: <CONTROL>{...}</CONTROL>
+  private parseControlBlock(content: string): {
+    cleanContent: string;
+    suggestedActions?: Array<{id: string; text: string; value?: string}>;
+    conversationState?: ConversationState;
+    mode?: 'processing_start' | 'final';
+  } | null {
+    const re = /<CONTROL>\s*([\s\S]*?)\s*<\/CONTROL>/i;
+    const match = content.match(re);
+    if (!match) return null;
+
+    const jsonRaw = match[1];
+    let obj: any = null;
+    try {
+      obj = JSON.parse(jsonRaw);
+    } catch {
+      return {
+        cleanContent: content.replace(re, '').trim()
+      } as any;
+    }
+
+    const actions = Array.isArray(obj?.suggested_actions)
+      ? obj.suggested_actions.map((a: any) => ({ id: String(a.id || a.text || 'action'), text: String(a.text || a.id || ''), value: a.value ? String(a.value) : undefined }))
+      : undefined;
+
+    const state: ConversationState | undefined = obj?.conversation_state && typeof obj.conversation_state === 'object'
+      ? {
+          activeWorkflow: obj.conversation_state.activeWorkflow ?? undefined,
+          workflowStep: obj.conversation_state.workflowStep ?? undefined,
+          collectedData: obj.conversation_state.collectedData ?? undefined
+        }
+      : undefined;
+
+    const modeVal = obj?.mode === 'processing_start' || obj?.mode === 'final' ? obj.mode : undefined;
+    const cleanContent = content.replace(re, '').trim();
+    return { cleanContent, suggestedActions: actions, conversationState: state, mode: modeVal };
   }
 
   private generateSuggestedActions(content: string): Array<{id: string; text: string; value?: string}> | undefined {

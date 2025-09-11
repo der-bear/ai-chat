@@ -1,39 +1,6 @@
 import { useState, useCallback } from 'react';
-
-export interface Message {
-  id: string;
-  text: string;
-  sender: 'user' | 'assistant';
-  timestamp: string;
-  agentUsed?: 'tools' | 'documentation' | 'intelligent';
-  toolCalls?: Array<Record<string, unknown>>;
-}
-
-export interface Conversation {
-  id: string;
-  title: string;
-  messages: Message[];
-  created: string;
-  lastUpdated: string;
-}
-
-export interface ChatState {
-  isInitialState: boolean;
-  currentConversation: Conversation | null;
-  conversations: Conversation[];
-  isTyping: boolean;
-  isMinimized: boolean;
-  isHistoryActive: boolean;
-  panelWidth: number;
-}
-
-interface ChatConfig {
-  maxConversations: number;
-  typingDelay: number;
-  storageKey: string;
-  minPanelWidth: number;
-  maxPanelWidth: number;
-}
+import type { Message, Conversation, ChatState, ChatConfig } from '../types/chat';
+export type { Message, Conversation, ChatState } from '../types/chat';
 
 const DEFAULT_CONFIG: ChatConfig = {
   maxConversations: 50,

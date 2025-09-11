@@ -231,8 +231,13 @@ export const Chat: React.FC<ChatProps> = ({ className = '' }) => {
 
       const finalResponse = response.content;
 
-      // Universal processing detection - if message ends with "now:" it's a processing start
-      if (finalResponse.trim().endsWith("now:") || finalResponse.includes("I'm creating") || finalResponse.includes("I'm configuring")) {
+      // Deterministic processing detection via control mode, fallback to heuristic
+      const isProcessingStart = response.mode === 'processing_start'
+        || finalResponse.trim().endsWith("now:")
+        || finalResponse.includes("I'm creating")
+        || finalResponse.includes("I'm configuring");
+
+      if (isProcessingStart) {
         // This is a processing start message
         addMessage({
           text: finalResponse,
@@ -247,14 +252,14 @@ export const Chat: React.FC<ChatProps> = ({ className = '' }) => {
         setTimeout(async () => {
           try {
             // Request completion from AI
-            const completionResponse = await openAIService.sendMessage(
-              "Continue with the creation process and show the completion result.",
+            const completionResponse = await openaiService.sendMessage(
+              "Continue the creation. Return ONLY a single line in this exact format and nothing else: 'Client/Delivery/Account created successfully: [Entity Name (ID: 12345)](#)'. Do not add explanations or continuation in this message. Append the <CONTROL> block as specified.",
               [...conversation.messages.map(m => ({
                 role: m.sender === 'user' ? 'user' as const : 'assistant' as const,
                 content: m.text
               })), 
               { role: 'assistant', content: finalResponse },
-              { role: 'user', content: 'Continue with the creation process and show the completion result.' }]
+              { role: 'user', content: "Continue the creation. Return only the single-line success with entity link as specified." }]
             );
             
             updateState({ isTyping: false });
@@ -264,6 +269,28 @@ export const Chat: React.FC<ChatProps> = ({ className = '' }) => {
               text: completionResponse.content,
               sender: 'assistant',
               agentUsed: 'intelligent'
+            });
+
+            // Immediately continue to next logical step in a new message
+            updateState({ isTyping: true });
+            const continuationResponse = await openaiService.sendMessage(
+              "Now continue to the next logical workflow step based on the specification. Start with a concise sentence (e.g., 'Now I'll set up the delivery method...') and present only the relevant options with suggested actions. Do not start processing yet.",
+              [...conversation.messages.map(m => ({
+                role: m.sender === 'user' ? 'user' as const : 'assistant' as const,
+                content: m.text
+              })),
+              { role: 'assistant', content: finalResponse },
+              { role: 'user', content: 'Continue the creation. Return only the single-line success with entity link as specified.' },
+              { role: 'assistant', content: completionResponse.content },
+              { role: 'user', content: 'Continue to the next logical workflow step and present options only.' }]
+            );
+
+            updateState({ isTyping: false });
+            addMessage({
+              text: continuationResponse.content,
+              sender: 'assistant',
+              agentUsed: 'intelligent',
+              suggestedActions: continuationResponse.suggestedActions
             });
             
           } catch (error) {
