@@ -19,6 +19,7 @@ export const useChatState = (config: Partial<ChatConfig> = {}) => {
     conversations: [],
     isTyping: false,
     isMinimized: false,
+    isMaximized: false,
     isHistoryActive: false,
     panelWidth: 400
   });

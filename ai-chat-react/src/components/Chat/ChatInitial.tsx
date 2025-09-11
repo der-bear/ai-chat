@@ -2,10 +2,11 @@ import React, { useState, useRef, useEffect } from 'react';
 
 interface ChatInitialProps {
   onSendMessage: (message: string) => void;
+  onFlowTrigger?: (flowMessage: string) => void;
   isTyping: boolean;
 }
 
-export const ChatInitial: React.FC<ChatInitialProps> = ({ onSendMessage, isTyping }) => {
+export const ChatInitial: React.FC<ChatInitialProps> = ({ onSendMessage, onFlowTrigger, isTyping }) => {
   const [inputValue, setInputValue] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -66,6 +67,7 @@ export const ChatInitial: React.FC<ChatInitialProps> = ({ onSendMessage, isTypin
         </div>
         <h1 className="ai-chat__title">LeadExec Copilot</h1>
       </div>
+      
       <div className="ai-chat__initial-input-wrapper">
         <div className="ai-chat__initial-input-group">
           <textarea
@@ -84,6 +86,27 @@ export const ChatInitial: React.FC<ChatInitialProps> = ({ onSendMessage, isTypin
             onClick={handleSend}
           >
             <i className="cil-send"></i>
+          </button>
+        </div>
+        
+        <div className="ai-chat__tools-pills">
+          <button 
+            className="ai-chat__tool-pill" 
+            onClick={() => onFlowTrigger ? onFlowTrigger('Create new client') : onSendMessage('Create new client')}
+            disabled={isTyping}
+          >
+            <i className="cil-user-plus"></i>
+            Create Client
+          </button>
+          
+          <button className="ai-chat__tool-pill ai-chat__tool-pill--disabled" disabled>
+            <i className="cil-people"></i>
+            Bulk Create Clients
+          </button>
+          
+          <button className="ai-chat__tool-pill ai-chat__tool-pill--disabled" disabled>
+            <i className="cil-chart-pie"></i>
+            Client Insights
           </button>
         </div>
       </div>

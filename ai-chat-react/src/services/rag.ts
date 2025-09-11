@@ -44,7 +44,7 @@ export class RagService {
   }
 
   // Compute embedding for query and return top-K chunks for the given agent type
-  async queryTopK(query: string, k = 5, agentType?: 'tools' | 'documentation'): Promise<RagChunk[]> {
+  async queryTopK(query: string, k = 5, agentType?: 'tools' | 'documentation' | 'schema'): Promise<RagChunk[]> {
     if (!this.client) {
       throw new Error('RagService: OpenAI API key not provided to compute query embeddings at runtime.');
     }
@@ -70,7 +70,11 @@ export class RagService {
 
     // Optionally prioritize by source (tools -> client-create-flow, docs -> knowledgebase)
     if (agentType) {
-      const preferred = agentType === 'tools' ? 'client-create-flow' : 'knowledgebase';
+      const preferred = agentType === 'tools'
+        ? 'client-create-flow'
+        : agentType === 'schema'
+          ? 'delivery-api'
+          : 'knowledgebase';
       scored.sort((a, b) => {
         const aPref = a.chunk.source.includes(preferred) ? 1 : 0;
         const bPref = b.chunk.source.includes(preferred) ? 1 : 0;

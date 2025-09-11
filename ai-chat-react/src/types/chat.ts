@@ -11,6 +11,7 @@ export interface Message {
   timestamp: string;
   agentUsed?: 'tools' | 'documentation' | 'intelligent';
   suggestedActions?: SuggestedAction[];
+  fileUpload?: boolean;
   functionCalls?: Array<{
     name: string;
     arguments: Record<string, unknown>;
@@ -38,6 +39,7 @@ export interface ChatState {
   conversations: Conversation[];
   isTyping: boolean;
   isMinimized: boolean;
+  isMaximized: boolean;
   isHistoryActive: boolean;
   panelWidth: number;
 }

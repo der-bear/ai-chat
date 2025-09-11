@@ -6,7 +6,7 @@ interface ChatHeaderProps {
   onHistoryToggle: () => void;
   onBackClick: () => void;
   onNewChat: () => void;
-  onMinimizeToggle: () => void;
+  onMaximizeToggle: () => void;
   onClose: () => void;
 }
 
@@ -15,7 +15,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
   onHistoryToggle,
   onBackClick,
   onNewChat,
-  onMinimizeToggle,
+  onMaximizeToggle,
   onClose
 }) => {
   return (
@@ -50,12 +50,12 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
         </button>
         <button 
           className="ai-chat__action" 
-          data-action="minimize" 
+          data-action="maximize" 
           type="button" 
-          title="Minimize"
-          onClick={onMinimizeToggle}
+          title={state.isMaximized ? "Exit Fullscreen" : "Maximize"}
+          onClick={onMaximizeToggle}
         >
-          <i className={state.isMinimized ? "cil-window-maximize" : "cil-minus"}></i>
+          <i className={state.isMaximized ? "cil-view-column" : "cil-window-maximize"}></i>
         </button>
         <button 
           className="ai-chat__action" 

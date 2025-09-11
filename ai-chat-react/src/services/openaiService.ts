@@ -1,27 +1,32 @@
-import { IntelligentAgent, type AgentResponse } from './intelligentAgent';
+import { AgentRouter } from './agentRouter';
+import type { AgentResponse } from './intelligentAgent';
 
 export type { AgentResponse };
 
 export class OpenAIService {
-  private intelligentAgent: IntelligentAgent;
+  private router: AgentRouter;
 
   constructor() {
-    this.intelligentAgent = new IntelligentAgent();
+    this.router = new AgentRouter();
   }
 
   setDocumentation() {
-    // Documentation is now handled by the intelligent agent's RAG system
+    // Documentation is now handled by the help agent's RAG system
     // No need to manually set it
   }
 
   setClientCreateFlow(flow: string) {
-    this.intelligentAgent.setClientCreateFlow(flow);
+    this.router.setClientCreateFlow(flow);
+  }
+
+  setAgentInstructions(instructions: string) {
+    this.router.setAgentInstructions(instructions);
   }
 
   async sendMessage(
     message: string, 
     conversationHistory: Array<{role: 'user' | 'assistant', content: string}> = []
   ): Promise<AgentResponse> {
-    return await this.intelligentAgent.sendMessage(message, conversationHistory);
+    return await this.router.sendMessage(message, conversationHistory);
   }
 }

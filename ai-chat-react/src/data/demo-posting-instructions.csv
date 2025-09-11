@@ -1,0 +1,4 @@
+firstName,lastName,email,phone,loanAmount,creditScore,propertyValue,loanPurpose,propertyType,occupancy,state,zipCode,annualIncome,employmentStatus
+Sarah,Martinez,sarah@pacific.com,555-0123,350000,750,450000,Purchase,Single Family,Primary,CA,92101,85000,Full-time
+John,Smith,john@example.com,555-7890,275000,680,325000,Refinance,Condo,Primary,TX,75001,72000,Self-employed
+Maria,Garcia,maria@test.com,555-4567,425000,720,550000,Purchase,Townhome,Primary,FL,33101,95000,Full-time

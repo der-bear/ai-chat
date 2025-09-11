@@ -8,7 +8,9 @@ const DATA_DIR = path.join(ROOT, 'src', 'data');
 const INDEX_PATH = path.join(DATA_DIR, 'rag-index.json');
 const FILES = [
   { file: 'client-create-flow.md', source: 'client-create-flow' },
-  { file: 'knowledgebase.md', source: 'knowledgebase' }
+  { file: 'knowledgebase.md', source: 'knowledgebase' },
+  // Added as reference-only schema; keep chunk count modest
+  { file: 'delivery-api.md', source: 'delivery-api' }
 ];
 
 const API_KEY = process.env.OPENAI_API_KEY || process.env.VITE_OPENAI_API_KEY;

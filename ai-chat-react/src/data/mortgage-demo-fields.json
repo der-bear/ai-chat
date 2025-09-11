@@ -1,0 +1,60 @@
+{
+  "leadType": "Mortgage",
+  "description": "Home loan and refinancing leads with comprehensive borrower information",
+  "requiredFields": [
+    "firstName",
+    "lastName", 
+    "email",
+    "phone",
+    "loanAmount",
+    "creditScore",
+    "propertyValue",
+    "loanPurpose",
+    "propertyType",
+    "occupancy",
+    "state",
+    "zipCode",
+    "annualIncome",
+    "employmentStatus"
+  ],
+  "sampleData": {
+    "firstName": "Sarah",
+    "lastName": "Martinez",
+    "email": "sarah@example.com", 
+    "phone": "555-0123",
+    "loanAmount": "350000",
+    "creditScore": "750",
+    "propertyValue": "450000",
+    "loanPurpose": "Purchase",
+    "propertyType": "Single Family",
+    "occupancy": "Primary",
+    "state": "CA",
+    "zipCode": "92101",
+    "annualIncome": "85000",
+    "employmentStatus": "Full-time"
+  },
+  "systemFieldMapping": {
+    "firstName": "first_name",
+    "lastName": "last_name",
+    "email": "email",
+    "phone": "primary_phone",
+    "loanAmount": "loan_amount",
+    "creditScore": "credit_score", 
+    "propertyValue": "property_value",
+    "loanPurpose": "loan_purpose",
+    "propertyType": "property_type",
+    "occupancy": "occupancy_type",
+    "state": "state",
+    "zipCode": "zip_code",
+    "annualIncome": "monthly_income",
+    "employmentStatus": "employment_status"
+  },
+  "contextualFields": [
+    "loan_amount",
+    "credit_score",
+    "property_value", 
+    "loan_purpose",
+    "property_type",
+    "occupancy_type"
+  ]
+}

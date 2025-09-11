@@ -17,7 +17,7 @@
 .markdown-content table th,
 .markdown-content table td {
   border: 1px solid var(--cui-border-color, #d8dbe0);
-  padding: 0.5rem 0.75rem;
+  padding: 0.375rem 0.5rem;
   text-align: left;
   word-wrap: break-word;
   word-break: break-all;
@@ -120,15 +120,13 @@
 
 /* Full-width tables that extend to chat panel edges */
 .ai-chat__bubble--assistant .markdown-content table {
-  margin-left: -0.75rem;
-  margin-right: -0.75rem;
-  width: calc(100% + 1.5rem);
+  width: 100%;
   max-width: none;
 }
 
-/* Make bubbles with tables much wider - nearly full width */
+/* Make bubbles with tables use full width */
 .ai-chat__message:has(.markdown-content table) {
-  max-width: 95%;
+  max-width: 100%;
 }
 
 .ai-chat__bubble--assistant:has(.markdown-content table) {
@@ -185,7 +183,7 @@
   cursor: pointer;
   font-size: 0.875rem;
   font-weight: 500;
-  padding: 0.5rem 1rem;
+  padding: 0.375rem 0.75rem;
   transition: all 0.15s ease-in-out;
   white-space: nowrap;
   max-width: 200px;
@@ -226,6 +224,193 @@
   background: var(--cui-gray-900, #212529);
   border-color: var(--cui-gray-800, #343a40);
   color: var(--cui-gray-600, #6c757d);
+}
+
+/* ========================================
+   MODAL MAXIMIZE MODE
+   ======================================== */
+/* Modal backdrop */
+.chat-maximized::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+}
+
+/* Modal window */
+.ai-chat--maximized {
+  position: fixed !important;
+  top: 120px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: min(800px, calc(100vw - 128px)) !important;
+  height: calc(100vh - 200px) !important;
+  z-index: 1001 !important;
+  background: var(--cui-body-bg, #fff);
+  border-radius: 12px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+/* Ensure dark mode toggle stays above backdrop */
+.dark-mode-toggle {
+  z-index: 10000 !important;
+}
+
+/* Initial screen tool pills */
+.ai-chat__tools-pills {
+  display: flex;
+  gap: 0.5rem;
+  margin: 1.5rem 0;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.ai-chat__tool-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.75rem;
+  border: 1px solid var(--cui-border-color, #d8dbe0);
+  border-radius: 1.5rem;
+  background: var(--cui-white, #fff);
+  color: var(--cui-body-color, #212529);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  white-space: nowrap;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ai-chat__tool-pill:hover:not(:disabled) {
+  background: var(--cui-gray-100, #f8f9fa);
+  border-color: var(--cui-primary, #0d6efd);
+  color: var(--cui-primary, #0d6efd);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.ai-chat__tool-pill:disabled {
+  background: var(--cui-gray-200, #e9ecef);
+  border-color: var(--cui-gray-300, #dee2e6);
+  color: var(--cui-gray-500, #6c757d);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.ai-chat__tool-pill i {
+  font-size: 1rem;
+}
+
+/* Dark mode support */
+[data-coreui-theme="dark"] .ai-chat__tool-pill {
+  background: var(--cui-gray-800, #343a40);
+  border-color: var(--cui-gray-700, #495057);
+  color: var(--cui-gray-100, #f8f9fa);
+}
+
+[data-coreui-theme="dark"] .ai-chat__tool-pill:hover:not(:disabled) {
+  background: var(--cui-gray-700, #495057);
+}
+
+/* File Upload Component */
+.file-upload {
+  margin: 1rem 0;
+}
+
+.file-upload__dropzone {
+  border: 2px dashed var(--cui-border-color, #d8dbe0);
+  border-radius: 0.5rem;
+  padding: 1.5rem 1rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: transparent;
+}
+
+.file-upload__dropzone:hover {
+  border-color: var(--cui-gray-400, #adb5bd);
+  background: var(--cui-gray-50, #f8f9fa);
+}
+
+.file-upload__dropzone--dragging {
+  border-color: var(--cui-primary, #0d6efd);
+  background: var(--cui-primary-bg-subtle, #e7f3ff);
+  transform: scale(1.01);
+}
+
+.file-upload__dropzone--processing {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.file-upload__icon {
+  font-size: 1.5rem;
+  color: var(--cui-secondary-color, #6c757d);
+  margin-bottom: 0.75rem;
+}
+
+.file-upload__content h4 {
+  margin: 0 0 0.5rem 0;
+  color: var(--cui-body-color, #212529);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.file-upload__content p {
+  margin: 0 0 1rem 0;
+  color: var(--cui-secondary-color, #6c757d);
+}
+
+.file-upload__formats,
+.file-upload__note {
+  margin: 0.5rem 0;
+}
+
+.file-upload__formats small,
+.file-upload__note small {
+  color: var(--cui-tertiary-color, #8c8c8c);
+  font-size: 0.825rem;
+}
+
+.file-upload__processing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.file-upload__spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid var(--cui-gray-300, #dee2e6);
+  border-top: 3px solid var(--cui-primary, #0d6efd);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Dark mode support */
+[data-coreui-theme="dark"] .file-upload__dropzone {
+  background: var(--cui-gray-800, #343a40);
+  border-color: var(--cui-gray-700, #495057);
+}
+
+[data-coreui-theme="dark"] .file-upload__dropzone:hover,
+[data-coreui-theme="dark"] .file-upload__dropzone--dragging {
+  background: var(--cui-gray-700, #495057);
 }
 
 /* ========================================
@@ -377,7 +562,7 @@ body.theme-switching *::after {
     --ai-chat-button-size: 2rem; /* 32px equivalent */
     --ai-chat-input-min-height: 2.5rem; /* 40px equivalent */
     --ai-chat-input-max-height: 10rem; /* 160px equivalent */
-    --ai-chat-message-max-width: 80%;
+    --ai-chat-message-max-width: 100%;
     
     /* Spacing - Using CoreUI Design Tokens */
     --ai-chat-padding: 1rem; /* CoreUI spacing-4 equivalent */
@@ -938,7 +1123,6 @@ body.theme-switching *::after {
 }
 
 .ai-chat__content {
-    max-width: var(--ai-chat-message-max-width);
 }
 
 .ai-chat__bubble {

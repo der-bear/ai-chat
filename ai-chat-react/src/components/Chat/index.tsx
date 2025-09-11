@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useChatState } from '../../hooks/useChatState';
 import { OpenAIService } from '../../services/openaiService';
+import { FileProcessor } from '../../services/fileProcessor';
+import { AIAutoMapper } from '../../services/aiAutoMapper';
 import type { SuggestedAction } from '../../types/chat';
 // No actual tools - AI agent emulates workflows based on system prompt context
 import { ChatHeader } from './ChatHeader';
@@ -23,6 +25,7 @@ interface ResizeState {
 // Import knowledgebase and client flow content
 import knowledgebaseContent from '../../data/knowledgebase.md?raw';
 import clientCreateFlowContent from '../../data/client-create-flow.md?raw';
+import agentInstructionsContent from '../../data/agent-instructions.md?raw';
 
 interface ChatProps {
   className?: string;
@@ -51,8 +54,11 @@ export const Chat: React.FC<ChatProps> = ({ className = '' }) => {
     const service = new OpenAIService();
     service.setDocumentation();
     service.setClientCreateFlow(clientCreateFlowContent);
+    service.setAgentInstructions(agentInstructionsContent);
     return service;
   });
+
+  const [aiMapper] = useState(() => new AIAutoMapper());
 
   const resizeStateRef = useRef<ResizeState>({
     isResizing: false,
@@ -200,12 +206,111 @@ export const Chat: React.FC<ChatProps> = ({ className = '' }) => {
   };
 
   const handleSuggestedActionClick = (action: SuggestedAction) => {
+    // Check if this is an "Upload instructions" action
+    if (action.id === 'upload' || action.text === 'Upload instructions') {
+      // Add a file upload message
+      addMessage({
+        text: 'Perfect! We\'ll automatically extract field mappings and requirements. Please upload in the widget below:',
+        sender: 'assistant',
+        agentUsed: 'intelligent',
+        fileUpload: true
+      });
+      return;
+    }
+    
+    // Check if this is "Create missing fields" action
+    if (action.id === 'create' || action.text === 'Create Now') {
+      addMessage({
+        text: 'Perfect! Missing fields have been created automatically. Now I\'ll proceed with the webhook configuration.',
+        sender: 'assistant',
+        agentUsed: 'intelligent'
+      });
+      
+      // Continue to next step
+      setTimeout(() => {
+        handleSendMessage('Continue with webhook setup');
+      }, 1000);
+      return;
+    }
+    
     // Keep UI simple: echo the agent-provided value or text.
     const messageText = action.value || action.text;
     handleSendMessage(messageText);
   };
 
-  const handleSendMessage = async (message: string) => {
+  const handleFlowTrigger = (flowMessage: string) => {
+    // For flow triggers from initial screen, skip showing user message
+    handleSendMessage(flowMessage, true);
+  };
+
+  const handleFileUpload = async (file: File, content: string) => {
+    try {
+      // Show processing message
+      addMessage({
+        text: `Analyzing ${file.name}...`,
+        sender: 'assistant',
+        agentUsed: 'intelligent'
+      });
+
+      updateState({ isTyping: true });
+
+      // Process the file structure
+      const fileResult = await FileProcessor.processFile(file, content);
+      
+      // Use AI to intelligently map fields
+      const aiResult = await aiMapper.mapFields(fileResult.fields, fileResult.sampleData);
+      
+      updateState({ isTyping: false });
+
+      // Create mapping table
+      let mappingTable = '| System Field | Delivery Field | Status |\n|--------------|----------------|--------|\n';
+      
+      aiResult.mappings.forEach(mapping => {
+        const statusText = mapping.status === 'mapped' ? 'Mapped' : 
+                          mapping.status === 'skipped' ? 'Skipped' : 'Created';
+        mappingTable += `| ${mapping.systemField} | ${mapping.userField} | ${statusText} |\n`;
+      });
+      
+      let resultMessage = `Perfect! I've analyzed your posting instructions and found and mapped these required fields:\n\n`;
+      resultMessage += `**Required Fields:**\n`;
+      fileResult.fields.forEach(field => {
+        resultMessage += `• **${field}**\n`;
+      });
+      
+      resultMessage += `\n**Field Mapping Results:**\n\n${mappingTable}`;
+      
+      const skipped = aiResult.mappings.filter(m => m.status === 'skipped');
+      if (skipped.length > 0) {
+        resultMessage += `\n**Skipped, no system match:**\n`;
+        skipped.forEach(mapping => {
+          resultMessage += `• **${mapping.userField}**\n`;
+        });
+      }
+      
+      resultMessage += `\n\nSuccessfully mapped ${aiResult.summary.mapped} out of ${aiResult.summary.totalFields} fields. Would you like automatically create missed fields or you can add those later.`;
+      
+      // Add the processing result message
+      addMessage({
+        text: resultMessage,
+        sender: 'assistant',
+        agentUsed: 'intelligent',
+        suggestedActions: [
+          { id: 'create', text: 'Create Now', value: 'Create missing fields automatically' },
+          { id: 'later', text: 'I\'ll Create Later', value: 'I will add missing fields manually later' }
+        ]
+      });
+      
+    } catch (error) {
+      updateState({ isTyping: false });
+      addMessage({
+        text: `Sorry, I couldn't process that file. Please make sure it's a valid CSV, JSON, or Excel file.`,
+        sender: 'assistant',
+        agentUsed: 'intelligent'
+      });
+    }
+  };
+
+  const handleSendMessage = async (message: string, skipUserMessage = false) => {
     try {
       // Create conversation if needed
       let conversation = state.currentConversation;
@@ -214,8 +319,10 @@ export const Chat: React.FC<ChatProps> = ({ className = '' }) => {
         updateState({ isInitialState: false });
       }
 
-      // Add user message
-      addMessage({ text: message, sender: 'user' });
+      // Add user message (unless skipped for flow triggers)
+      if (!skipUserMessage) {
+        addMessage({ text: message, sender: 'user' });
+      }
       updateState({ isTyping: true });
 
       // Get conversation history for context
@@ -230,68 +337,127 @@ export const Chat: React.FC<ChatProps> = ({ className = '' }) => {
         conversationHistory
       );
 
-      // Helper to strip any accidental success lines to avoid duplicates
-      const stripCreatedSuccess = (text: string) => {
-        const lines = text.split('\n');
-        const filtered = lines.filter(l => !/created successfully\s*:/i.test(l));
-        return filtered.join('\n').trim();
-      };
 
       const finalResponse = response.content;
 
-      // Deterministic processing detection via control mode only
-      const isProcessingStart = response.mode === 'processing_start';
+      // Smart processing detection
+      const isProcessingStart = (finalResponse.includes("I'm creating") && finalResponse.trim().endsWith("now:")) ||
+                               finalResponse.includes("I'm configuring") && finalResponse.trim().endsWith("now:");
 
       if (isProcessingStart) {
-        // Do not show the redundant "creating now" message; show typing only
-        updateState({ isTyping: true });
+        // Show the processing start message first
+        addMessage({
+          text: finalResponse,
+          sender: 'assistant',
+          agentUsed: 'intelligent'
+        });
 
-        // Generate completion message after short delay
+        // Show loading for realistic processing time (small delay to ensure message renders first)
+        setTimeout(() => {
+          updateState({ isTyping: true });
+        }, 100);
+        
+        // Generate completion message after delay
         setTimeout(async () => {
           try {
             // Request completion from AI
             const completionResponse = await openaiService.sendMessage(
-              "Continue the creation. Return ONLY a single line in this exact format and nothing else: 'Client/Delivery/Account created successfully: [Entity Name (ID: 12345)](#)'. Do not add explanations or continuation in this message. Append the <CONTROL> block as specified.",
+              "Show ONLY the completion result. Return ONLY this single line: 'Client record created successfully: [Company Name (ID: 12345)](#)'. Do NOT add any other text or continue to delivery setup.",
               [...conversation.messages.map(m => ({
                 role: m.sender === 'user' ? 'user' as const : 'assistant' as const,
                 content: m.text
               })), 
               { role: 'assistant', content: finalResponse },
-              { role: 'user', content: "Continue the creation. Return only the single-line success with entity link as specified." }]
+              { role: 'user', content: 'Show only the completion line, nothing else.' }]
             );
             
             updateState({ isTyping: false });
             
             // Add completion message
             addMessage({
-              text: stripCreatedSuccess(completionResponse.content),
+              text: completionResponse.content,
               sender: 'assistant',
               agentUsed: 'intelligent',
+              suggestedActions: completionResponse.suggestedActions,
               conversationState: completionResponse.conversationState
             });
             
-            // Immediately continue to next logical step in a new message
-            updateState({ isTyping: true });
-            const continuationResponse = await openaiService.sendMessage(
-              "Now continue to the next logical workflow step based on the specification. Start with a concise sentence (e.g., 'Now I'll set up the delivery method...') and present only the relevant options with suggested actions. Do not start processing yet.",
-              [...conversation.messages.map(m => ({
-                role: m.sender === 'user' ? 'user' as const : 'assistant' as const,
-                content: m.text
-              })),
-              { role: 'assistant', content: finalResponse },
-              { role: 'user', content: 'Continue the creation. Return only the single-line success with entity link as specified.' },
-              { role: 'assistant', content: completionResponse.content },
-              { role: 'user', content: 'Continue to the next logical workflow step and present options only.' }]
-            );
-
-            updateState({ isTyping: false });
-            addMessage({
-              text: stripCreatedSuccess(continuationResponse.content),
-              sender: 'assistant',
-              agentUsed: 'intelligent',
-              suggestedActions: continuationResponse.suggestedActions,
-              conversationState: continuationResponse.conversationState
-            });
+            // Auto-suggest next step based on what was created
+            if (completionResponse.content.includes('Client record created successfully')) {
+              setTimeout(async () => {
+                updateState({ isTyping: true });
+                
+                const continuationResponse = await openaiService.sendMessage(
+                  "Ask about lead type selection FIRST. Say 'Great! Now I need to know what type of leads this client will receive. This is required for setting up delivery methods and determines the available fields and targeting options.' Provide lead type buttons: [Mortgage/Home Loan] [Auto] [Insurance] [Personal Loan] [Credit Card].",
+                  [...conversation.messages.map(m => ({
+                    role: m.sender === 'user' ? 'user' as const : 'assistant' as const,
+                    content: m.text
+                  })),
+                  { role: 'assistant', content: completionResponse.content }]
+                );
+                
+                updateState({ isTyping: false });
+                addMessage({
+                  text: continuationResponse.content,
+                  sender: 'assistant',
+                  agentUsed: 'intelligent',
+                  suggestedActions: continuationResponse.suggestedActions,
+                  conversationState: continuationResponse.conversationState
+                });
+              }, 800);
+            }
+            
+            // Auto-suggest delivery account after delivery method creation
+            if (completionResponse.content.includes('Delivery method created successfully') || 
+                completionResponse.content.includes('delivery method created successfully')) {
+              setTimeout(async () => {
+                updateState({ isTyping: true });
+                
+                const continuationResponse = await openaiService.sendMessage(
+                  "Suggest creating delivery account. Say 'Perfect! Now shall we create the delivery account? This sets up pricing, targeting criteria, and lead limits. Portal delivery is ready to go with minimal setup.' Then provide [Yes, create account] [Not right now] buttons.",
+                  [...conversation.messages.map(m => ({
+                    role: m.sender === 'user' ? 'user' as const : 'assistant' as const,
+                    content: m.text
+                  })),
+                  { role: 'assistant', content: completionResponse.content }]
+                );
+                
+                updateState({ isTyping: false });
+                addMessage({
+                  text: continuationResponse.content,
+                  sender: 'assistant',
+                  agentUsed: 'intelligent',
+                  suggestedActions: continuationResponse.suggestedActions,
+                  conversationState: continuationResponse.conversationState
+                });
+              }, 800);
+            }
+            
+            // Auto-suggest activation after delivery account creation  
+            if (completionResponse.content.includes('Delivery account created successfully') || 
+                completionResponse.content.includes('delivery account created successfully')) {
+              setTimeout(async () => {
+                updateState({ isTyping: true });
+                
+                const continuationResponse = await openaiService.sendMessage(
+                  "Show testing results and suggest activation. Include testing table, then say 'Perfect! Your complete setup is now configured. The client is currently set to Inactive status (default for new clients). To start receiving leads, you'll need to activate the client.' Then provide [Activate now] [Activate later] buttons.",
+                  [...conversation.messages.map(m => ({
+                    role: m.sender === 'user' ? 'user' as const : 'assistant' as const,
+                    content: m.text
+                  })),
+                  { role: 'assistant', content: completionResponse.content }]
+                );
+                
+                updateState({ isTyping: false });
+                addMessage({
+                  text: continuationResponse.content,
+                  sender: 'assistant',
+                  agentUsed: 'intelligent',
+                  suggestedActions: continuationResponse.suggestedActions,
+                  conversationState: continuationResponse.conversationState
+                });
+              }, 800);
+            }
             
           } catch (error) {
             updateState({ isTyping: false });
@@ -305,7 +471,7 @@ export const Chat: React.FC<ChatProps> = ({ className = '' }) => {
               agentUsed: 'intelligent'
             });
           }
-        }, 1200);
+        }, 800);
         
         return; // Don't send the original message again
       }
@@ -316,7 +482,8 @@ export const Chat: React.FC<ChatProps> = ({ className = '' }) => {
         sender: 'assistant',
         agentUsed: 'intelligent',
         suggestedActions: response.suggestedActions,
-        conversationState: response.conversationState
+        conversationState: response.conversationState,
+        fileUpload: response.fileUpload
       });
 
     } catch (error) {
@@ -351,15 +518,15 @@ export const Chat: React.FC<ChatProps> = ({ className = '' }) => {
     });
   };
 
-  const handleMinimizeToggle = () => {
-    const newMinimized = !state.isMinimized;
-    updateState({ isMinimized: newMinimized });
+  const handleMaximizeToggle = () => {
+    const newMaximized = !state.isMaximized;
+    updateState({ isMaximized: newMaximized });
     
-    if (newMinimized) {
-      document.body.classList.add('chat-minimized');
+    if (newMaximized) {
+      document.body.classList.add('chat-maximized');
       document.body.classList.remove('has-chat-panel');
     } else {
-      document.body.classList.remove('chat-minimized');
+      document.body.classList.remove('chat-maximized');
       document.body.classList.add('has-chat-panel');
     }
   };
@@ -383,6 +550,7 @@ export const Chat: React.FC<ChatProps> = ({ className = '' }) => {
     let classes = 'ai-chat';
     if (state.isInitialState) classes += ' ai-chat--initial-state';
     if (state.isMinimized) classes += ' ai-chat--minimized';
+    if (state.isMaximized) classes += ' ai-chat--maximized';
     if (state.isHistoryActive) classes += ' ai-chat--history-active';
     if (className) classes += ` ${className}`;
     return classes;
@@ -399,7 +567,7 @@ export const Chat: React.FC<ChatProps> = ({ className = '' }) => {
         onHistoryToggle={handleHistoryToggle}
         onBackClick={handleBackClick}
         onNewChat={handleNewChat}
-        onMinimizeToggle={handleMinimizeToggle}
+        onMaximizeToggle={handleMaximizeToggle}
         onClose={handleClose}
       />
 
@@ -416,6 +584,7 @@ export const Chat: React.FC<ChatProps> = ({ className = '' }) => {
       {state.isInitialState && !state.isHistoryActive && (
         <ChatInitial
           onSendMessage={handleSendMessage}
+          onFlowTrigger={handleFlowTrigger}
           isTyping={state.isTyping}
         />
       )}
@@ -426,6 +595,7 @@ export const Chat: React.FC<ChatProps> = ({ className = '' }) => {
           messages={state.currentConversation.messages}
           isTyping={state.isTyping}
           onSuggestedActionClick={handleSuggestedActionClick}
+          onFileUpload={handleFileUpload}
         />
       )}
 

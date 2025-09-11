@@ -1,0 +1,52 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic:
+    - button " " [ref=e3] [cursor=pointer]:
+      - generic [ref=e4] [cursor=pointer]: 
+      - generic [ref=e5] [cursor=pointer]: 
+    - generic [ref=e6]:
+      - banner [ref=e8]:
+        - generic [ref=e9]:
+          - text: 
+          - button " New" [ref=e10] [cursor=pointer]:
+            - generic [ref=e11] [cursor=pointer]: 
+            - generic [ref=e12] [cursor=pointer]: New
+        - generic [ref=e13]:
+          - button "" [ref=e14] [cursor=pointer]:
+            - generic [ref=e15] [cursor=pointer]: 
+          - button "" [ref=e16] [cursor=pointer]:
+            - generic [ref=e17] [cursor=pointer]: 
+          - button "" [ref=e18] [cursor=pointer]:
+            - generic [ref=e19] [cursor=pointer]: 
+      - main [ref=e20]:
+        - generic [ref=e21]:
+          - generic [ref=e23]: 
+          - generic [ref=e25]: Create a new client for lead distribution
+        - generic [ref=e26]:
+          - generic [ref=e28]: 
+          - generic [ref=e29]:
+            - generic [ref=e31]:
+              - paragraph [ref=e32]:
+                - text: "To get started, I'll need the following client details:"
+                - text: •
+                - strong [ref=e33]: "Company name:"
+                - text: •
+                - strong [ref=e34]: "Contact name:"
+                - text: •
+                - strong [ref=e35]: "Email:"
+                - text: •
+                - strong [ref=e36]: "Phone number:"
+                - text: •
+                - strong [ref=e37]: "Business address:"
+                - text: •
+                - strong [ref=e38]: "Timezone:"
+              - paragraph [ref=e39]: Please provide these details, and I'll proceed with the setup.
+            - generic [ref=e40]: via intelligent agent
+      - contentinfo [ref=e41]:
+        - generic [ref=e42]:
+          - textbox "Type your message..." [active] [ref=e44]: Test Corp, Jane Smith, jane@test.com, 555-7777, Texas, CST
+          - button "" [ref=e45] [cursor=pointer]:
+            - generic [ref=e46] [cursor=pointer]: 
+```
