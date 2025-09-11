@@ -1,18 +1,19 @@
-# LeadExec Copilot - Claude Instructions & Memory
+# LeadExec Copilot - AI Chat React Application
 
 ## Project Overview
-This is an agentic React chat application with two specialized OpenAI agents. The system uses instruction-based flow emulation rather than real API integrations.
+This is a React + TypeScript + Vite application that implements an intelligent chat interface with two specialized AI agents using instruction-based flow emulation and RAG (Retrieval-Augmented Generation).
 
 ## Architecture & Agent System
 
 ### Two-Agent Architecture
-1. **Tools Agent**: Handles action/execution scenarios through instruction-based emulation
-2. **Documentation Agent**: Answers questions using attached .md documentation as context
+1. **Tools Agent**: Emulates client setup flows using `src/data/client-create-flow.md` injected directly into system prompt
+2. **Documentation Agent**: Answers questions using RAG (Retrieval-Augmented Generation) from `src/data/knowledgebase.md`
 
-### Agent Routing Logic
-- **Tools Agent**: Triggered by action keywords (execute, run, create, configure, test, manage)
-- **Documentation Agent**: Triggered by question keywords (how, what, why, explain, help)
+### Agent Routing Logic (`openaiService.ts:40-74`)
+- **Tools Agent**: Action keywords (create, execute, run, configure, webhook, test, manage, etc.)
+- **Documentation Agent**: Question keywords (how, what, why, explain, help, etc.)
 - Smart routing based on message analysis and context
+- Default: Documentation agent for general queries
 
 ### Key Design Principles
 - **Instruction-Based Emulation**: No real APIs, everything simulated based on instructions
@@ -22,22 +23,42 @@ This is an agentic React chat application with two specialized OpenAI agents. Th
 
 ## Project Structure & Key Files
 
-### Core Components
 ```
-src/
-├── services/openaiService.ts    # Main agent logic & routing
-├── data/tools.ts               # Tool definitions for emulation
-├── data/documentation.md       # Knowledge base for docs agent
-├── styles/chat.css            # UI styling (preserved from original HTML)
-├── components/Chat/           # React chat components
-└── types/                     # TypeScript definitions
+ai-chat-react/
+├── src/
+│   ├── components/
+│   │   ├── Chat/              # Main chat UI components
+│   │   │   ├── ChatHeader.tsx
+│   │   │   ├── ChatHistory.tsx
+│   │   │   ├── ChatInitial.tsx
+│   │   │   ├── ChatInput.tsx
+│   │   │   ├── ChatMessages.tsx
+│   │   │   └── index.tsx
+│   │   └── DarkModeToggle.tsx
+│   ├── services/
+│   │   ├── openaiService.ts   # Core AI agent orchestration
+│   │   └── rag.ts            # RAG implementation for doc agent
+│   ├── data/
+│   │   ├── client-create-flow.md    # Tools agent instruction document
+│   │   ├── knowledgebase.md         # Documentation source for RAG
+│   │   └── rag-index.json           # Generated embeddings index
+│   ├── hooks/
+│   │   └── useChatState.ts    # Chat state management
+│   ├── types/
+│   │   └── chat.ts           # TypeScript definitions
+│   └── styles/
+│       └── chat.css          # Chat component styles
+├── scripts/
+│   └── build-rag.mjs         # RAG index generation script
+└── package.json
 ```
 
 ### Critical Files to Understand
-1. **openaiService.ts**: Contains both agents, routing logic, and tool emulation
-2. **tools.ts**: Defines available tools that can be emulated
-3. **documentation.md**: Knowledge base for documentation agent
-4. **chat.css**: Complete UI styling (converted from original HTML)
+1. **openaiService.ts**: Contains both agents, routing logic, and OpenAI integration
+2. **rag.ts**: RAG implementation with embeddings and semantic search
+3. **client-create-flow.md**: Complete workflow document for tools agent
+4. **knowledgebase.md**: Knowledge base for documentation agent with RAG
+5. **useChatState.ts**: React hook for chat state management
 
 ## Development Guidelines
 
@@ -65,73 +86,65 @@ src/
 ### Required Environment Variables
 ```
 VITE_OPENAI_API_KEY=your_api_key_here
-VITE_OPENAI_MODEL=gpt-4
+VITE_OPENAI_MODEL=gpt-5  # Optional (defaults to gpt-5, falls back to gpt-4o)
 ```
 
 ### Development Commands
 ```bash
 npm install          # Install dependencies
 npm run dev         # Start development server
-npm run build       # Build for production
+npm run build       # Build for production (includes TypeScript compilation)
+npm run lint        # Run ESLint
+npm run build:rag   # Generate RAG embeddings index
 ```
 
 ## Current Implementation Status
 
 ### Completed Features
-- ✅ Project structure with Vite + React + TypeScript
-- ✅ OpenAI SDK integration
+- ✅ Complete React + TypeScript + Vite application
+- ✅ OpenAI SDK integration with model fallback
 - ✅ Two-agent system with smart routing
-- ✅ Tool emulation framework
-- ✅ Documentation context system
-- ✅ CSS styling (converted from original HTML)
+- ✅ RAG implementation with semantic search
+- ✅ Tools agent with client-create-flow.md injection
+- ✅ Documentation agent with knowledgebase RAG
+- ✅ Complete UI with CoreUI components and dark mode
+- ✅ Chat state management with React hooks
+- ✅ RAG index generation script
 
-### In Progress / TODO
-- 🔄 React component conversion from HTML
-- 🔄 Message handling with agent routing
-- 🔄 Documentation context integration
-- 🔄 Tool execution capabilities
-- 🔄 Complete system testing
+### Current Status
+- ✅ Fully functional chat interface
+- ✅ Agent routing and message processing
+- ✅ Documentation context with RAG retrieval
+- ✅ Tool emulation with realistic responses
+- ✅ Production-ready build system
 
-## Agent Instructions & Behavior
+## Agent Implementation Details
 
-### Tools Agent System Message Template
-```
-You are a LeadExec Copilot specialized in executing tools and performing actions.
-Your role is to:
-1. Execute tool functions based on user requests
-2. Perform actions like managing clients, configuring webhooks, testing lead submissions
-3. Handle operational tasks and integrations
-4. Return structured data and actionable results
+### Tools Agent (`openaiService.ts:99-116`)
+- **Context**: Complete `client-create-flow.md` injected directly into system prompt
+- **Temperature**: 0.1 (more deterministic for workflow execution)
+- **Response Format**: JSON object for structured emulation results
+- **Behavior**: Strict workflow emulation, no real API calls, asks clarifying questions when info missing
 
-[Include available tools and their emulation instructions]
-```
+### Documentation Agent (`openaiService.ts:118-140`)
+- **Context**: RAG retrieval from `knowledgebase.md` chunks (top-5 semantic matches)
+- **Temperature**: 0.2 (slightly more creative for explanations)
+- **Fallback**: Uses documentation excerpt if RAG unavailable
+- **Behavior**: Provides answers with citations, suggests action workflows when appropriate
 
-### Documentation Agent System Message Template
-```
-You are a LeadExec Copilot specialized in answering questions based on documentation.
-Your role is to:
-1. Answer questions using the provided documentation context
-2. Explain concepts, features, and how-to information
-3. Provide guidance based on the knowledge base
-4. Help users understand the system and its capabilities
+## RAG Implementation Details
 
-[Include documentation content as context]
-```
+### RAG Service (`rag.ts`)
+- **Embeddings Model**: text-embedding-3-small from OpenAI
+- **Index Format**: Prebuilt JSON with chunks, sources, and embeddings
+- **Retrieval**: Cosine similarity scoring with source preference
+- **Chunking**: Handled by build script (`scripts/build-rag.mjs`)
 
-## Tool Emulation Guidelines
-
-### Emulation Principles
-1. **Realistic Responses**: Return data that looks like real API responses
-2. **Consistent Format**: Use JSON for structured data
-3. **Appropriate Delays**: Simulate processing time where realistic
-4. **Error Simulation**: Include realistic error scenarios
-5. **State Consistency**: Maintain logical state across interactions
-
-### Example Tool Emulations
-- **get_client_list**: Return mock client data with realistic properties
-- **create_webhook**: Generate webhook ID and confirmation details
-- **test_lead_submission**: Process test data and return processing results
-- **get_webhook_status**: Show webhook activity and statistics
+### RAG Workflow
+1. **Build Time**: `npm run build:rag` processes markdown files into chunks
+2. **Runtime**: Query embedding computed, similarity search performed
+3. **Ranking**: Combines similarity score with source preference (tools vs docs)
+4. **Fallback**: Uses full documentation excerpt if RAG index unavailable
 
 ## UI/UX Considerations
 

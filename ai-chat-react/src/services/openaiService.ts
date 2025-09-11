@@ -1,4 +1,5 @@
 import OpenAI from 'openai';
+import { RagService } from './rag';
 
 export interface AgentResponse {
   content: string;
@@ -9,6 +10,7 @@ export class OpenAIService {
   private client: OpenAI;
   private documentation: string = '';
   private clientCreateFlow: string = '';
+  private rag: RagService;
 
   constructor() {
     const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
@@ -20,6 +22,10 @@ export class OpenAIService {
       apiKey,
       dangerouslyAllowBrowser: true
     });
+
+    this.rag = new RagService(apiKey);
+    // Try to load a prebuilt index if present; ignore errors
+    this.rag.loadIndexFromBundle().catch(() => {});
   }
 
   setDocumentation(docs: string) {
@@ -74,18 +80,33 @@ export class OpenAIService {
     try {
       const agentType = this.determineAgentType(message);
       
-      // Use 2025 best practices with developer role messages (highest priority)
+      // Use developer/system message pattern
       const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [];
+
+      // For tools agent we prefer to inject the full clientCreateFlow (small, canonical file).
+      // For documentation agent, use RAG to retrieve top-K snippets from the knowledgebase.
+      let retrieved: Array<{ id: string; source: string; text: string }> = [];
+      if (agentType === 'documentation') {
+        try {
+          const chunks = await this.rag.queryTopK(message, 5, agentType);
+          retrieved = chunks.map(c => ({ id: c.id, source: c.source, text: c.text }));
+        } catch (e) {
+          console.warn('RAG retrieval skipped or failed for documentation agent:', e);
+          retrieved = [];
+        }
+      }
 
       if (agentType === 'tools') {
         // Tools agent: Use system message for workflow specification (highest priority)
+        const flowToInject = this.clientCreateFlow;
+
         messages.push({
           role: 'system',
           content: `You are a LeadExec Copilot specialized in executing tools and performing actions — BUT ONLY EMULATE. Do NOT call external APIs, perform any real side effects, or attempt to actually run tools.
 
 When users request client creation, use this markdown as the single source of truth for emulation (do not invent behavior or optional fields):
 
-${this.clientCreateFlow}
+${flowToInject}
 
 Strict rules:
 - Emulate the exact workflow and fields as specified in the provided markdown. Do not add, remove, or assume optional fields not described.
@@ -94,19 +115,27 @@ Strict rules:
 - If any required information is missing from the clientCreateFlow or the user's prompt, ask concise clarifying questions rather than guessing.
 `        });
       } else {
-        // Documentation agent: Use system message for knowledge base (highest priority)
+        // Documentation agent: Use RAG snippets; if none, fallback to a safe excerpt of full docs if reasonably small
+        const snippets = retrieved.length > 0
+          ? `\n\n---- Relevant snippets (from knowledgebase):\n${retrieved.map(r => `(${r.source}) [${r.id}] ${r.text.slice(0, 800)}...`).join('\n\n')}`
+          : '';
+
+        const FALLBACK_LIMIT = 20000;
+        const fallbackExcerpt = retrieved.length === 0 && this.documentation && this.documentation.length <= FALLBACK_LIMIT
+          ? `\n\n---- Fallback documentation excerpt (full KB is large; using excerpt):\n${this.documentation}`
+          : '';
+
         messages.push({
           role: 'system', 
-          content: `You are a LeadExec Copilot specialized in answering questions based on documentation. Do NOT perform real actions or call external tools — provide answers derived strictly from the provided documentation context.
+          content: `You are a LeadExec Copilot specialized in answering questions based on documentation. Do NOT perform real actions or call external tools — provide answers derived strictly from the provided documentation context. If the user intent appears to be performing an action (e.g., set up a client or delivery), provide the information and also suggest the exact emulation step they can run next with the Tools agent.
 
 Here is the documentation context you should use to answer questions:
-
-${this.documentation}
+${snippets}${fallbackExcerpt}
 
 Strict rules:
-- Base your answers only on the provided documentation. If the docs do not cover the question, explicitly say so and suggest contacting support.
-- If the user asks to perform an action, politely explain that you only emulate flows and ask them to specify the exact action they want emulated.
-- When answering, cite or reference the relevant section/title from the documentation where possible.
+- Base your answers only on the provided documentation context. If the docs do not cover the question, explicitly say so and suggest contacting support.
+- If the user asks to perform an action, suggest the appropriate emulation flow and ask if they want to proceed; you do not execute actions.
+- Cite or reference the relevant section/title where possible.
 `        });
       }
 
@@ -119,24 +148,42 @@ Strict rules:
       // Add current user message
       messages.push({ role: 'user', content: message });
 
-      const modelName = import.meta.env.VITE_OPENAI_MODEL || 'gpt-5';
-      
+      // Per-agent temperature for best quality
+      const temperature = agentType === 'tools' ? 0.1 : 0.2;
+
+      // Preferred model with fallback
+      const preferredModel = import.meta.env.VITE_OPENAI_MODEL || 'gpt-5';
+      let usedModel = preferredModel;
+
       console.log(`🚀 Sending request to OpenAI (${agentType} agent):`, {
-        model: modelName,
+        model: usedModel,
         messageCount: messages.length,
         userMessage: message,
-        contextLength: agentType === 'tools' ? this.clientCreateFlow.length : this.documentation.length,
-        apiKeyPresent: !!import.meta.env.VITE_OPENAI_API_KEY,
-        apiKeyLength: import.meta.env.VITE_OPENAI_API_KEY?.length || 0
+        contextSnippets: retrieved.length,
+        apiKeyPresent: !!import.meta.env.VITE_OPENAI_API_KEY
       });
 
       console.log('📋 About to call OpenAI API...');
-      
-      const completion = await this.client.chat.completions.create({
-        model: modelName,
-        messages,
-        max_completion_tokens: 1500
-      });
+
+      let completion;
+      try {
+        completion = await this.client.chat.completions.create({
+          model: usedModel,
+          messages,
+          temperature,
+          response_format: agentType === 'tools' ? { type: 'json_object' } as any : undefined
+        });
+      } catch (primaryError) {
+        console.warn('Primary model failed, attempting fallback model...', primaryError);
+        // Fallback to a widely available model
+        usedModel = 'gpt-4o';
+        completion = await this.client.chat.completions.create({
+          model: usedModel,
+          messages,
+          temperature,
+          response_format: agentType === 'tools' ? { type: 'json_object' } as any : undefined
+        });
+      }
 
       console.log('✅ OpenAI response received:', {
         choices: completion.choices.length,
@@ -165,11 +212,7 @@ Strict rules:
       console.error('Error details:', {
         message: error instanceof Error ? error.message : 'Unknown error',
         stack: error instanceof Error ? error.stack : undefined,
-        agentType: 'unknown',
-        messageLength: message.length,
-        historyLength: conversationHistory.length,
-        clientCreateFlowLength: this.clientCreateFlow.length,
-        documentationLength: this.documentation.length
+        agentType: 'unknown'
       });
       throw new Error(`Failed to get response: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }

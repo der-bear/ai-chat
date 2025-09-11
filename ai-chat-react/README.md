@@ -1,22 +1,19 @@
-# LeadExec Copilot - Agentic React Chat
+# LeadExec Copilot - AI Chat React Application
 
-An intelligent React-based chat interface powered by OpenAI agents. This application features two specialized AI agents that handle different types of user interactions through instruction-based flow emulation.
+An intelligent React + TypeScript chat interface powered by OpenAI agents. This application features two specialized AI agents using instruction-based flow emulation and RAG (Retrieval-Augmented Generation) for comprehensive user assistance.
 
 ## Architecture Overview
 
 ### Two-Agent System
 
-**1. Tools Agent** - Handles action/execution scenarios
-- Receives instructions to emulate specific workflows and tools
-- Simulates real-world operations based on provided instructions
-- Returns structured responses as if actual tools were executed
-- Examples: Managing clients, configuring webhooks, processing leads
+**1. Tools Agent** - Emulates the client setup flow
+- Uses the markdown file `src/data/client-create-flow.md` injected directly into the system prompt
+- Simulates real-world operations strictly following that document (no real API calls)
+- Returns human-readable emulation results
 
-**2. Documentation Agent** - Answers questions using knowledge base
-- Uses attached .md documentation as context
-- Provides explanations, guides, and conceptual information
-- Focused on helping users understand features and capabilities
-- Examples: How-to questions, feature explanations, troubleshooting
+**2. Documentation Agent** - Answers questions using the knowledge base
+- Retrieves relevant snippets from `src/data/knowledgebase.md` via semantic search (RAG)
+- Provides explanations, guides, and conceptual information with citations
 
 ### Smart Agent Routing
 The system automatically determines which agent to use based on:
@@ -24,201 +21,123 @@ The system automatically determines which agent to use based on:
 - **Question keywords**: how, what, why, explain, tell me, help, etc. → Documentation Agent
 - **Context analysis**: Message structure and intent
 
-### Instruction-Based Flow Emulation (2025 Best Practice)
-- Complete workflow documents embedded directly in agent system prompts (OpenAI recommended approach)
-- Leverages GPT-4.1/GPT-5's 1M token context window efficiently
-- No actual tools or API calls - pure AI emulation based on documentation context
-- Agent follows exact specifications from .md files without hardcoded logic
-- Zero-shot approach with clear task definition followed by context (optimal for modern models)
+### Instruction-Based Flow Emulation
+- Complete flow doc (`client-create-flow.md`) is embedded directly in the Tools agent system prompt
+- No actual tools or API calls — pure emulation based on the document
+- The agent follows the spec exactly; if info is missing, it asks concise questions
 
 ## Tech Stack
 
-- **Frontend**: React 18 + TypeScript + Vite
+- **Frontend**: React 19 + TypeScript + Vite
+- **AI Integration**: OpenAI SDK (Chat Completions + Embeddings for RAG)
 - **UI Framework**: CoreUI React components
-- **AI Integration**: OpenAI SDK (GPT-4)
-- **Styling**: Custom CSS with CoreUI design tokens
-- **State Management**: React hooks (useState, useContext)
+- **Styling**: Custom CSS with dark mode support
+- **State Management**: React hooks (useChatState)
 
 ## Project Structure
 
 ```
 src/
 ├── components/           # React components
-│   ├── Chat/            # Main chat interface components
-│   ├── DarkModeToggle/  # Theme switching component
-│   └── common/          # Shared components
-├── services/            # Business logic
-│   └── openaiService.ts # OpenAI agent management
-├── data/               # Static data and configuration
-│   ├── tools.ts        # Tool definitions for agents
-│   └── documentation.md # Knowledge base for docs agent
-├── styles/             # Styling
-│   └── chat.css        # Main chat component styles
-├── hooks/              # Custom React hooks
-├── types/              # TypeScript type definitions
-└── utils/              # Utility functions
+│   ├── Chat/             # Main chat UI components
+│   │   ├── ChatHeader.tsx
+│   │   ├── ChatHistory.tsx
+│   │   ├── ChatInitial.tsx
+│   │   ├── ChatInput.tsx
+│   │   ├── ChatMessages.tsx
+│   │   └── index.tsx
+│   └── DarkModeToggle.tsx
+├── services/             # OpenAI + RAG services
+│   ├── openaiService.ts  # Core AI agent orchestration
+│   └── rag.ts            # RAG implementation with embeddings
+├── data/                 # Agent context data
+│   ├── client-create-flow.md   # Tools agent instruction document
+│   ├── knowledgebase.md        # Documentation source for RAG
+│   └── rag-index.json          # Generated embeddings index
+├── hooks/
+│   └── useChatState.ts   # Chat state management
+├── types/
+│   └── chat.ts           # TypeScript definitions
+└── styles/
+    └── chat.css          # Chat component styles
 ```
-
-## Key Features
-
-### Chat Interface
-- **Responsive Design**: Works on desktop and mobile
-- **Dark/Light Mode**: Automatic theme switching with system preference
-- **Resizable Panel**: Adjustable chat panel width
-- **Floating Mode**: Minimizable floating chat window
-- **Message History**: Persistent conversation storage
-- **Typing Indicators**: Real-time chat experience
-
-### Agent Capabilities (2025 Optimized)
-- **Developer Role Context**: Uses highest-priority developer messages for workflow specifications
-- **GPT-5 Integration**: Optimized for latest model with correct parameters (max_completion_tokens, default temperature)
-- **Intent Recognition**: Automatic routing between specialized agents
-- **Workflow Emulation**: Complete process emulation from .md specifications via developer messages
-- **1M Token Leverage**: Efficiently uses GPT-5's expanded context window
-- **Zero-Shot Intelligence**: No examples needed - direct workflow following optimized for modern models
-- **Exact Specification Compliance**: Follows .md files precisely without hallucination
-
-### Developer Experience
-- **TypeScript**: Full type safety
-- **Hot Reload**: Instant development feedback
-- **ESLint**: Code quality and consistency
-- **Environment Configuration**: Easy setup with .env files
 
 ## Setup Instructions
 
-### Prerequisites
-- Node.js 18+ 
-- OpenAI API key
+1) Install
+```bash
+npm install
+```
 
-### Installation
-
-1. **Clone and install dependencies**
-   ```bash
-   npm install
-   ```
-
-2. **Environment configuration**
-   ```bash
-   cp .env.example .env
-   # Edit .env and add your OpenAI API key
-   ```
-
-3. **Start development server**
-   ```bash
-   npm run dev
-   ```
-
-### Environment Variables
-
+2) Environment
 ```env
-# Required
-VITE_OPENAI_API_KEY=your_openai_api_key_here
-
+VITE_OPENAI_API_KEY=your_openai_api_key
 # Optional
-VITE_OPENAI_MODEL=gpt-4  # Default model to use
+VITE_OPENAI_MODEL=gpt-5
 ```
 
-## Usage Examples
-
-### Tools Agent Interactions
+3) Build the RAG index (required for optimal Documentation agent performance)
+```bash
+npm run build:rag
 ```
-User: "Create a webhook for lead notifications"
-Agent: [Simulates webhook creation with realistic response]
+This processes `src/data/knowledgebase.md`, creates semantic chunks, generates OpenAI embeddings, and writes `src/data/rag-index.json`.
 
-User: "Test lead submission with sample data"
-Agent: [Emulates lead processing workflow]
-
-User: "Show me all active clients"
-Agent: [Returns simulated client list]
+4) Start dev server
+```bash
+npm run dev
 ```
 
-### Documentation Agent Interactions
-```
-User: "How do webhooks work in the system?"
-Agent: [Explains webhooks using documentation context]
+## Available Commands
 
-User: "What are the available lead sources?"
-Agent: [Provides information from knowledge base]
+- `npm run dev` - Start development server with hot reload
+- `npm run build` - Build for production (includes TypeScript compilation)
+- `npm run lint` - Run ESLint for code quality
+- `npm run preview` - Preview production build
+- `npm run build:rag` - Generate RAG embeddings index
 
-User: "Tell me about client management features"
-Agent: [Describes features based on documentation]
-```
+## Usage
+
+- Ask for actions like “Create a webhook for client X” → Tools agent emulates using `client-create-flow.md`.
+- Ask questions like “How do email delivery settings work?” → Docs agent answers using KB snippets.
+
+## Key Features
+
+### Smart Agent Routing
+- Automatic agent selection based on message analysis
+- Action-oriented requests → Tools Agent
+- Question-oriented requests → Documentation Agent
+- Context-aware routing with fallback handling
+
+### RAG Implementation
+- Semantic search using OpenAI embeddings (text-embedding-3-small)
+- Cosine similarity scoring for relevant chunk retrieval
+- Source-aware ranking for improved accuracy
+- Prebuilt index for fast runtime performance
+
+### Production-Ready Architecture
+- TypeScript throughout for type safety
+- CoreUI components for professional UI
+- Dark/light mode support
+- Responsive design with proper state management
 
 ## Customization
 
-### Adding New Tools
-1. Define tool schema in `src/data/tools.ts`
-2. Add emulation logic in `openaiService.ts`
-3. Update agent instructions if needed
+- **Update flow behavior**: Edit `src/data/client-create-flow.md` (no code changes required)
+- **Update knowledge base**: Edit `src/data/knowledgebase.md`, then run `npm run build:rag`
+- **Modify UI**: Update CoreUI components in `src/components/Chat/`
+- **Extend functionality**: Add new agent types or routing logic in `openaiService.ts`
 
-### Updating Documentation
-1. Edit `src/data/documentation.md`
-2. Documentation agent automatically uses updated content
-3. No code changes required
+## Development Notes
 
-### Styling Customization
-- Modify CSS variables in `src/styles/chat.css`
-- Follows CoreUI design token system
-- Supports dark/light mode theming
+- **Emulation Only**: This prototype emulates workflows without real API calls
+- **Model Fallback**: Attempts preferred model (gpt-5), falls back to gpt-4o
+- **Browser Integration**: Uses `dangerouslyAllowBrowser: true` for client-side OpenAI calls
+- **Security**: For production, implement server-side OpenAI calls and secure API keys
 
-## Development Guidelines
+## Architecture Details
 
-### Agent Instructions
-- Keep instructions detailed and specific
-- Focus on realistic workflow emulation
-- Maintain consistency in response formats
-- Test both agent types thoroughly
-
-### Code Standards
-- Use TypeScript for type safety
-- Follow React best practices
-- Maintain component modularity
-- Write meaningful component names
-
-### Testing Strategy
-- Test agent routing logic
-- Verify tool emulation responses
-- Check documentation context accuracy
-- Validate responsive design
-
-## Deployment
-
-### Build for Production
-```bash
-npm run build
-```
-
-### Environment Setup
-- Set production OpenAI API key
-- Configure proper error logging
-- Set up monitoring for API usage
-
-## Troubleshooting
-
-### Common Issues
-
-**Agent not responding**
-- Check OpenAI API key configuration
-- Verify internet connection
-- Check browser console for errors
-
-**Wrong agent selected**
-- Review message for action vs question keywords
-- Check agent routing logic
-- Consider adjusting keyword detection
-
-**Styling issues**
-- Verify CoreUI CSS is loaded
-- Check for CSS variable conflicts
-- Ensure proper theme detection
-
-## Contributing
-
-1. Follow existing code patterns
-2. Add TypeScript types for new features
-3. Test agent interactions thoroughly
-4. Update documentation as needed
-
-## License
-
-MIT License - See LICENSE file for details
+### Agent Implementation
+- **Tools Agent**: Complete workflow document injected into system prompt, temperature 0.1
+- **Documentation Agent**: RAG retrieval with semantic search, temperature 0.2
+- **Error Handling**: Comprehensive error handling with fallback strategies
+- **Logging**: Detailed console logging for debugging and monitoring
