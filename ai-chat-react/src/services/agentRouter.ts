@@ -1,9 +1,11 @@
 import { IntelligentAgent, type AgentResponse } from './intelligentAgent';
 import { HelpAgent } from './helpAgent';
+import { IntentClassifier } from './intentClassifier';
 
 export class AgentRouter {
   private flowAgent: IntelligentAgent;
   private helpAgent: HelpAgent;
+  private intentClassifier: IntentClassifier;
   private workflowState: {
     interrupted: boolean;
     lastFlowStep?: string;
@@ -15,6 +17,7 @@ export class AgentRouter {
   constructor() {
     this.flowAgent = new IntelligentAgent();
     this.helpAgent = new HelpAgent();
+    this.intentClassifier = new IntentClassifier();
   }
 
   setAgentInstructions(instructions: string) {
@@ -33,8 +36,13 @@ export class AgentRouter {
       return resumedFlow;
     }
 
-    // Determine if this is a help/documentation question vs workflow execution
-    const isHelpQuestion = this.isHelpQuestion(message, conversationHistory);
+    // Use intent classifier for intelligent routing
+    const intent = await this.intentClassifier.classifyIntent(message, conversationHistory);
+    
+    // Determine routing based on intent
+    const isHelpQuestion = intent.intent === 'general_documentation' || 
+                          intent.intent === 'help_request' ||
+                          (intent.intent === 'workflow_contextual' && intent.confidence > 0.8);
     
     if (isHelpQuestion) {
       // Save current workflow state if in active flow
@@ -87,6 +95,7 @@ export class AgentRouter {
     return response;
   }
 
+  // Kept for backwards compatibility but mainly using intent classifier now
   private isHelpQuestion(message: string, conversationHistory: Array<{role: 'user' | 'assistant', content: string}>): boolean {
     const lowerMessage = message.toLowerCase();
     const recentContext = conversationHistory.slice(-2).map(m => m.content.toLowerCase()).join(' ');
@@ -228,8 +237,8 @@ export class AgentRouter {
     if (recentContent.includes('delivery method') && (recentContent.includes('portal') || recentContent.includes('webhook'))) {
       this.workflowState.pendingActions = [
         { id: 'portal', text: 'Portal', value: 'Use portal delivery' },
-        { id: 'webhook', text: 'Webhook', value: 'Set up webhook delivery' },
-        { id: 'email', text: 'Email', value: 'Set up email delivery' },
+        { id: 'webhook', text: 'Webhook', value: 'Webhook' },
+        { id: 'email', text: 'Email', value: 'Email' },
         { id: 'ftp', text: 'FTP', value: 'Configure FTP' }
       ];
       return 'delivery_method_selection';
@@ -244,12 +253,8 @@ export class AgentRouter {
     }
     
     if (recentContent.includes('lead type') || recentContent.includes('industry')) {
-      this.workflowState.pendingActions = [
-        { id: 'mortgage_default', text: '54353', value: 'Mortgage Default (54353)' },
-        { id: 'mortgage_refi', text: '98999', value: 'Mortgage Refinance (98999)' },
-        { id: 'auto_insurance', text: '76421', value: 'Auto Insurance (76421)' },
-        { id: 'custom', text: 'Custom', value: 'Create custom lead type' }
-      ];
+      // Manual ID only - no buttons for lead type selection
+      this.workflowState.pendingActions = [];
       return 'lead_type_selection';
     }
     
@@ -263,7 +268,7 @@ export class AgentRouter {
     
     if (recentContent.includes('client setup') || recentContent.includes('shall i proceed')) {
       this.workflowState.pendingActions = [
-        { id: 'proceed', text: 'Yes, proceed', value: 'yes' },
+        { id: 'proceed', text: 'Yes', value: 'yes' },
         { id: 'review', text: 'Not yet', value: 'Not yet' }
       ];
       return 'client_confirmation';
@@ -281,7 +286,7 @@ export class AgentRouter {
       case 'credential_selection':
         return 'Would you like to auto-generate credentials or provide custom ones?';
       case 'lead_type_selection':
-        return 'Which lead type would you like to configure for this client?';
+        return 'Please type the lead type ID number (like 54353) for this client:';
       case 'activation_choice':
         return 'Would you like to activate the client now or later?';
       default:

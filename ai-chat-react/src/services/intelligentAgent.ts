@@ -230,7 +230,7 @@ export class IntelligentAgent {
     // Confirmation 
     if (lowerContent.includes('shall i proceed') || lowerContent.includes('confirm to create')) {
       return [
-        { id: 'proceed', text: 'Yes, proceed', value: 'yes' },
+        { id: 'proceed', text: 'Yes', value: 'yes' },
         { id: 'review', text: 'Not yet', value: 'Not yet' }
       ];
     }
@@ -238,8 +238,8 @@ export class IntelligentAgent {
     // Delivery method suggestion
     if (lowerContent.includes('would you like to set up') && lowerContent.includes('delivery')) {
       return [
-        { id: 'proceed', text: 'Yes, set up delivery', value: 'Yes, set up delivery' },
-        { id: 'later', text: 'Not right now', value: 'Not right now' }
+        { id: 'proceed', text: 'Yes', value: 'Yes' },
+        { id: 'later', text: 'Not yet', value: 'Not yet' }
       ];
     }
     
@@ -248,8 +248,8 @@ export class IntelligentAgent {
         (lowerContent.includes('webhook') && lowerContent.includes('ftp') && lowerContent.includes('email'))) {
       return [
         { id: 'portal', text: 'Portal', value: 'Use portal delivery' },
-        { id: 'webhook', text: 'Webhook', value: 'Set up webhook delivery' },
-        { id: 'email', text: 'Email', value: 'Set up email delivery' },
+        { id: 'webhook', text: 'Webhook', value: 'Webhook' },
+        { id: 'email', text: 'Email', value: 'Email' },
         { id: 'ftp', text: 'FTP', value: 'Configure FTP' }
       ];
     }
@@ -271,7 +271,7 @@ export class IntelligentAgent {
     if (lowerContent.includes('create the delivery account') || lowerContent.includes('shall we create')) {
       return [
         { id: 'proceed', text: 'Yes, create account', value: 'Yes, create account' },
-        { id: 'later', text: 'Not right now', value: 'Not right now' }
+        { id: 'later', text: 'Not yet', value: 'Not yet' }
       ];
     }
     

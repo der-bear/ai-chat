@@ -270,10 +270,11 @@ export const Chat: React.FC<ChatProps> = ({ className = '' }) => {
         mappingTable += `| ${mapping.systemField} | ${mapping.userField} | ${statusText} |\n`;
       });
       
-      let resultMessage = `Perfect! I've analyzed your posting instructions and found and mapped these required fields:\n\n`;
-      resultMessage += `**Required Fields:**\n`;
+      let resultMessage = `Perfect! I've analyzed your posting instructions and here are the field mapping results:\n\n`;
+      resultMessage += `| Field | Mapped To |\n`;
+      resultMessage += `|-------|----------|\n`;
       fileResult.fields.forEach(field => {
-        resultMessage += `• **${field}**\n`;
+        resultMessage += `| **${field}** | ${field} |\n`;
       });
       
       resultMessage += `\n**Field Mapping Results:**\n\n${mappingTable}`;
@@ -387,7 +388,7 @@ export const Chat: React.FC<ChatProps> = ({ className = '' }) => {
                 updateState({ isTyping: true });
                 
                 const continuationResponse = await openaiService.sendMessage(
-                  "Ask about lead type selection FIRST. Say 'Great! Now I need to know what type of leads this client will receive. This is required for setting up delivery methods and determines the available fields and targeting options.' Provide lead type buttons: [Mortgage/Home Loan] [Auto] [Insurance] [Personal Loan] [Credit Card].",
+                  "Ask about lead type selection FIRST. Say 'Great! Now I need to know what type of leads this client will receive. I found these existing lead types in the system: Mortgage Default (54353), Mortgage Refinance (98999), Auto Insurance (76421). Please type the ID number (like 54353) for the lead type you want.' NO BUTTONS - user must type the ID.",
                   [...conversation.messages.map(m => ({
                     role: m.sender === 'user' ? 'user' as const : 'assistant' as const,
                     content: m.text

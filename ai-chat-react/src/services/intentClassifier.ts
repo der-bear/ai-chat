@@ -2,6 +2,7 @@ import OpenAI from 'openai';
 
 export type Intent = 
   | 'workflow_execution'     // Creating, proceeding, configuring
+  | 'workflow_data_provision' // Providing company info, details during workflow
   | 'workflow_contextual'    // Questions about current workflow options/fields  
   | 'general_documentation'  // System explanations, "what is X"
   | 'help_request';          // Explicit help requests
@@ -91,9 +92,30 @@ export class IntentClassifier {
     const inWorkflow = recentContext.includes('client setup') || 
                       recentContext.includes('delivery method') ||
                       recentContext.includes('shall i proceed') ||
-                      recentContext.includes('industry vertical');
+                      recentContext.includes('industry vertical') ||
+                      recentContext.includes('company name') ||
+                      recentContext.includes('contact name');
 
     if (inWorkflow) {
+      // Check for data provision (company info, contact details, etc.)
+      const isDataProvision = !lowerMessage.includes('?') && 
+                             lowerMessage.length > 10 &&
+                             (lowerMessage.includes('@') || // Email
+                              lowerMessage.includes('company') ||
+                              lowerMessage.includes('llc') ||
+                              lowerMessage.includes('inc') ||
+                              lowerMessage.includes('corp') ||
+                              /\d{3}[-.\s]?\d{3}[-.\s]?\d{4}/.test(lowerMessage) || // Phone
+                              /\b\d{5}\b/.test(lowerMessage)); // ZIP code
+      
+      if (isDataProvision) {
+        return {
+          intent: 'workflow_data_provision',
+          confidence: 0.95,
+          reasoning: 'User is providing workflow data (company info, contact details)'
+        };
+      }
+      
       const contextualIndicators = ['which', 'what are', 'available', 'options', 'can i', 'should i'];
       if (contextualIndicators.some(indicator => lowerMessage.includes(indicator))) {
         return {
