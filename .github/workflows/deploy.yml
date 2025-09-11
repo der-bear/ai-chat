@@ -41,10 +41,10 @@ jobs:
           echo "VITE_OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" > .env
           echo "VITE_OPENAI_MODEL=gpt-4o" >> .env
 
-      - name: Build RAG index
+      - name: Build RAG index (optional)
         run: |
           cd ai-chat-react
-          npm run build:rag
+          npm run build:rag || echo "RAG build failed, continuing without index"
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 

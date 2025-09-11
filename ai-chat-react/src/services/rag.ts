@@ -38,8 +38,15 @@ export class RagService {
         embedding: (item && Array.isArray(item.embedding)) ? (item.embedding as number[]) : []
       }));
     } catch (err) {
-      console.warn('RAG: no bundled index found (src/data/rag-index.json).', err);
-      this.index = [];
+      try {
+        // Try fallback empty index
+        const fallbackMod: any = await import('../data/rag-index-fallback.json');
+        this.index = [];
+        console.warn('RAG: using fallback (empty) index, main RAG build may have failed.');
+      } catch (fallbackErr) {
+        console.warn('RAG: no bundled index found, operating without RAG context.', err);
+        this.index = [];
+      }
     }
   }
 
