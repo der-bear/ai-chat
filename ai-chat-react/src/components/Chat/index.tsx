@@ -200,6 +200,7 @@ export const Chat: React.FC<ChatProps> = ({ className = '' }) => {
   };
 
   const handleSuggestedActionClick = (action: SuggestedAction) => {
+    // Keep UI simple: echo the agent-provided value or text.
     const messageText = action.value || action.text;
     handleSendMessage(messageText);
   };
@@ -242,18 +243,10 @@ export const Chat: React.FC<ChatProps> = ({ className = '' }) => {
       const isProcessingStart = response.mode === 'processing_start';
 
       if (isProcessingStart) {
-        // This is a processing start message
-        addMessage({
-          text: stripCreatedSuccess(finalResponse),
-          sender: 'assistant', 
-          agentUsed: 'intelligent',
-          conversationState: response.conversationState
-        });
-
-        // Show loading for realistic processing time
+        // Do not show the redundant "creating now" message; show typing only
         updateState({ isTyping: true });
-        
-        // Generate completion message after delay
+
+        // Generate completion message after short delay
         setTimeout(async () => {
           try {
             // Request completion from AI
@@ -276,7 +269,7 @@ export const Chat: React.FC<ChatProps> = ({ className = '' }) => {
               agentUsed: 'intelligent',
               conversationState: completionResponse.conversationState
             });
-
+            
             // Immediately continue to next logical step in a new message
             updateState({ isTyping: true });
             const continuationResponse = await openaiService.sendMessage(
@@ -312,7 +305,7 @@ export const Chat: React.FC<ChatProps> = ({ className = '' }) => {
               agentUsed: 'intelligent'
             });
           }
-        }, 2500);
+        }, 1200);
         
         return; // Don't send the original message again
       }
@@ -333,7 +326,12 @@ export const Chat: React.FC<ChatProps> = ({ className = '' }) => {
         sender: 'assistant'
       });
     } finally {
-      updateState({ isTyping: false });
+      // If a processing sequence is underway, keep typing until it finishes
+      // We cannot read keepTyping here (block scope), so guard by not overriding 'true' states.
+      // Only force false if we are not already typing.
+      if (!state.isTyping) {
+        updateState({ isTyping: false });
+      }
     }
   };
 

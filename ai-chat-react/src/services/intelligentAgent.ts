@@ -84,9 +84,9 @@ export class IntelligentAgent {
 - **ALWAYS use suggested actions**: [Auto-generate] [Custom]
 - **STOP MESSAGE** - wait for choice
 
-**STAGE 3 - CREATION WITH COMPLETE TABLE**:
-- Start: "Excellent! I'm creating the client record now:"
-- Show COMPLETE table with ALL ACTUAL VALUES:
+**STAGE 3 - PREVIEW + CONFIRMATION (NO PROCESSING YET)**:
+- Start: "Here is the client setup preview. Please confirm to create:"
+- Show COMPLETE table with ALL ACTUAL VALUES (each property in its own row):
 
 | Field | Value |
 |-------|-------|
@@ -99,11 +99,16 @@ export class IntelligentAgent {
 | **Password** | [actual generated: ABC-8chars] |
 | **Status** | Inactive (default) |
 
-- Generate realistic 4-5 digit ID
-- End: "Client record created successfully: [Company Name (ID: 45782)](#)"
-- **UNIVERSAL RULE**: STOP MESSAGE HERE - never continue to delivery
+- Ask: "Shall I proceed with creating this client?" and provide suggested actions [Yes, proceed] [Not yet]
+- **STOP MESSAGE** - do not create yet
 
-**STAGE 4 - DELIVERY CONTINUATION**:
+**STAGE 4 - PROCESSING + COMPLETION (LINK ONLY)**:
+- On confirmation, reply: "I'm creating the client record now:" and set control mode to 'processing_start'. Do NOT include the success line here.
+- The next message (completion) must be a single line ONLY:
+  "Client record created successfully: [Company Name (ID: 45782)](#)"
+- After completion, continue in a new message with delivery options
+
+**STAGE 5 - DELIVERY CONTINUATION**:
 - NEW MESSAGE: "Now I'll set up the delivery method..."
 - Present delivery options with suggested actions: [Use portal delivery] [Set up webhook delivery] [Configure FTP] [Set up email]
 - **STOP MESSAGE** after options
@@ -221,6 +226,14 @@ CONTROL OUTPUT INSTRUCTIONS (append to every reply):
 - Use empty array/object when not applicable. Do not include any extra keys.
 - Set "mode":"processing_start" only when you are signaling that you are starting processing (e.g., "I'm creating ... now:"). Use "final" in all other replies. In 'processing_start' replies, NEVER include the "created successfully" line.
 - When completing an entity creation, the completion message must contain ONLY a single line: "Client/Delivery/Account created successfully: [Entity Name (ID: 12345)](#)".
+
+SUGGESTED ACTIONS CONTRACT:
+- Always provide canonical ids from this set: ["auto","custom","proceed","review","portal","webhook","email","ftp","upload","manual","activate","later"].
+- Always set each action.value to either a concise instruction the user would say OR a compact token in the form "ACTION:<id>".
+- Treat incoming values starting with "ACTION:" as authoritative commands. Examples:
+  - ACTION:proceed → begin processing and set <CONTROL>{"mode":"processing_start"}; do not include the success line in that message.
+  - ACTION:auto → use auto-generated credentials and show the preview table + confirmation (no processing).
+  - ACTION:webhook → transition into webhook configuration (do not re-list delivery options).
 
 Example:
 <CONTROL>{"suggested_actions":[{"id":"proceed","text":"Yes, proceed"}],"conversation_state":{"workflowStep":"confirmation"},"mode":"final"}</CONTROL>
@@ -343,44 +356,44 @@ Example:
     // 1. CREDENTIAL CHOICE (Binary decision)
     if (content.includes('Auto-generate credentials') && content.includes('custom credentials')) {
       actions.push(
-        { id: 'auto', text: 'Auto-generate', value: 'Auto-generate' },
-        { id: 'custom', text: 'Custom', value: 'I want custom credentials' }
+        { id: 'auto', text: 'Auto-generate', value: 'ACTION:auto' },
+        { id: 'custom', text: 'Custom', value: 'ACTION:custom' }
       );
     }
 
     // 2. DELIVERY METHOD SELECTION (4 options)
     else if (content.includes('portal delivery') && content.includes('webhook delivery')) {
       actions.push(
-        { id: 'portal', text: 'Use portal delivery', value: 'Use portal delivery' },
-        { id: 'webhook', text: 'Set up webhook delivery', value: 'Set up webhook delivery' },
-        { id: 'email', text: 'Set up email delivery', value: 'Set up email delivery' },
-        { id: 'ftp', text: 'Configure FTP delivery', value: 'Configure FTP delivery' }
+        { id: 'portal', text: 'Use portal delivery', value: 'ACTION:portal' },
+        { id: 'webhook', text: 'Set up webhook delivery', value: 'ACTION:webhook' },
+        { id: 'email', text: 'Set up email delivery', value: 'ACTION:email' },
+        { id: 'ftp', text: 'Configure FTP delivery', value: 'ACTION:ftp' }
       );
     }
 
     // 3. POSTING INSTRUCTIONS CHOICE (Binary process)
     else if (content.includes('Upload posting instructions') && content.includes('Configure manually')) {
       actions.push(
-        { id: 'upload', text: 'Upload instructions', value: 'Upload instructions' },
-        { id: 'manual', text: 'Configure manually', value: 'Configure manually' }
+        { id: 'upload', text: 'Upload instructions', value: 'ACTION:upload' },
+        { id: 'manual', text: 'Configure manually', value: 'ACTION:manual' }
       );
     }
 
     // 4. TARGETING CRITERIA (Multiple choices)
     else if (content.includes('Add state targeting') && content.includes('loan amount minimum')) {
       actions.push(
-        { id: 'state', text: 'Add state targeting', value: 'Add state targeting' },
-        { id: 'loan', text: 'Add loan minimum', value: 'Add loan amount minimum' },
-        { id: 'credit', text: 'Add credit minimum', value: 'Add credit score minimum' },
-        { id: 'proceed', text: 'Proceed current', value: 'Proceed with current criteria' }
+        { id: 'state', text: 'Add state targeting', value: 'ACTION:state' },
+        { id: 'loan', text: 'Add loan minimum', value: 'ACTION:loan' },
+        { id: 'credit', text: 'Add credit minimum', value: 'ACTION:credit' },
+        { id: 'proceed', text: 'Proceed current', value: 'ACTION:proceed' }
       );
     }
 
     // 5. ACTIVATION DECISION (Final choice)
     else if (content.includes('Activate now') && content.includes('Activate later')) {
       actions.push(
-        { id: 'activate', text: 'Activate now', value: 'Activate now' },
-        { id: 'later', text: 'Activate later', value: 'Activate later' }
+        { id: 'activate', text: 'Activate now', value: 'ACTION:activate' },
+        { id: 'later', text: 'Activate later', value: 'ACTION:later' }
       );
     }
 
@@ -390,8 +403,8 @@ Example:
               content.includes('proceed with creating')) &&
               content.includes('client')) {
       actions.push(
-        { id: 'proceed', text: 'Yes, proceed', value: 'Yes, proceed' },
-        { id: 'review', text: 'Not yet', value: 'Not yet, let me review' }
+        { id: 'proceed', text: 'Yes, proceed', value: 'ACTION:proceed' },
+        { id: 'review', text: 'Not yet', value: 'ACTION:review' }
       );
     }
 
