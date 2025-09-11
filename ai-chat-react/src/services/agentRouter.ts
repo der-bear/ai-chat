@@ -56,7 +56,8 @@ export class AgentRouter {
             content: `${helpResponse.content}\n\n${continuationPrompt}`,
             conversationState: this.flowAgent.getConversationState(),
             suggestedActions: pendingActions,
-            mode: 'final'
+            mode: 'final',
+            agentType: 'help'
           };
         }
         
@@ -64,7 +65,8 @@ export class AgentRouter {
           content: helpResponse.content,
           conversationState: undefined,
           suggestedActions: undefined,
-          mode: 'final'
+          mode: 'final',
+          agentType: 'help'
         };
       } catch (error) {
         // Fallback to flow agent if help agent fails
@@ -160,8 +162,8 @@ export class AgentRouter {
       return true;
     }
 
-    // If in active workflow, prioritize workflow execution unless explicitly asking for help
-    if (inWorkflow && !helpIndicators.some(indicator => lowerMessage.includes(indicator))) {
+    // If in active workflow, ALWAYS prioritize workflow execution - NO interruptions
+    if (inWorkflow) {
       return false;
     }
 

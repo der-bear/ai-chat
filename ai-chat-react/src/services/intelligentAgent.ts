@@ -11,6 +11,7 @@ export interface AgentResponse {
   }>;
   mode?: 'processing_start' | 'final';
   fileUpload?: boolean;
+  agentType?: 'workflow' | 'help';
 }
 
 export interface ConversationState {
@@ -144,7 +145,8 @@ export class IntelligentAgent {
           conversationState: this.conversationState,
           suggestedActions,
           mode: control.mode || 'final',
-          fileUpload: control.fileUpload
+          fileUpload: control.fileUpload,
+          agentType: 'workflow'
         };
       }
 
@@ -155,7 +157,8 @@ export class IntelligentAgent {
         content,
         conversationState: this.conversationState,
         suggestedActions,
-        mode: 'final'
+        mode: 'final',
+        agentType: 'workflow'
       };
 
     } catch (error) {
