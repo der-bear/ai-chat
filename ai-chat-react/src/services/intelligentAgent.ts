@@ -17,6 +17,29 @@ export interface ConversationState {
   activeWorkflow?: string;
   workflowStep?: string;
   collectedData?: Record<string, unknown>;
+  currentEntity?: {
+    type: 'client' | 'delivery_method' | 'delivery_account';
+    id?: string;
+    completedSteps: string[];
+    providedData: Record<string, any>;
+  };
+  // Entity-specific state tracking per instructions
+  clientState?: {
+    companyName?: string;
+    contactEmail?: string;
+    credentialsProvided?: boolean;
+    industrySelected?: string;
+    leadTypeSelected?: string;
+  };
+  deliveryMethodState?: {
+    methodType?: string;
+    deliveryAccountCreated?: boolean;
+  };
+  deliveryAccountState?: {
+    webhookUrl?: string;
+    apiKey?: string;
+    fieldMappingComplete?: boolean;
+  };
 }
 
 export class IntelligentAgent {
