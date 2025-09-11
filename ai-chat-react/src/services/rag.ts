@@ -40,7 +40,7 @@ export class RagService {
     } catch (err) {
       try {
         // Try fallback empty index
-        const fallbackMod: any = await import('../data/rag-index-fallback.json');
+        await import('../data/rag-index-fallback.json');
         this.index = [];
         console.warn('RAG: using fallback (empty) index, main RAG build may have failed.');
       } catch (fallbackErr) {
