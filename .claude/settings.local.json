@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx playwright:*)",
+      "Bash(open:*)",
+      "Bash(node:*)",
+      "WebFetch(domain:coreui.io)",
+      "Bash(npm create:*)",
+      "Bash(npm install)",
+      "Bash(npm install:*)",
+      "Read(//Users/aderkach/Source/**)",
+      "Bash(npm run dev:*)",
+      "Bash(cat:*)",
+      "Bash(pkill:*)",
+      "WebSearch",
+      "WebFetch(domain:platform.openai.com)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -1,0 +1,45 @@
+export interface Message {
+  id: string;
+  text: string;
+  sender: 'user' | 'assistant';
+  timestamp: string;
+  agentUsed?: 'tools' | 'documentation';
+  toolCalls?: any[];
+}
+
+export interface Conversation {
+  id: string;
+  title: string;
+  messages: Message[];
+  created: string;
+  lastUpdated: string;
+}
+
+export interface ChatState {
+  isInitialState: boolean;
+  currentConversation: Conversation | null;
+  conversations: Conversation[];
+  isTyping: boolean;
+  isMinimized: boolean;
+  isHistoryActive: boolean;
+  panelWidth: number;
+}
+
+export interface ChatConfig {
+  maxConversations: number;
+  typingDelay: number;
+  storageKey: string;
+  minPanelWidth: number;
+  maxPanelWidth: number;
+}
+
+export interface ResizeState {
+  isResizing: boolean;
+  startX: number;
+  startWidth: number;
+  rafId: number | null;
+  boundEventHandlers: {
+    doResize: (e: MouseEvent | TouchEvent) => void;
+    endResize: () => void;
+  } | null;
+}
