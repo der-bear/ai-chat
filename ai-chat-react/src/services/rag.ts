@@ -23,18 +23,19 @@ export class RagService {
       // Attempt to import the JSON index if it exists
       // This will work in Vite dev/build and Node if the file is present
       // Use dynamic import but guard with try/catch in case file missing
-      // @ts-expect-error - Dynamic import of JSON
-      const mod = await import('../data/rag-index.json');
-      const raw: Array<unknown> = mod?.default || mod;
-      if (!Array.isArray(raw)) {
+      const mod: any = await import('../data/rag-index.json');
+      const rawAny: any = (mod && 'default' in mod) ? mod.default : mod;
+      if (!Array.isArray(rawAny)) {
         this.index = [];
         return;
       }
-      this.index = raw.map((item, i) => ({
-        id: item.id || `chunk_${i}`,
-        source: item.source || item.sourcePath || 'unknown',
-        text: item.text || item.chunk || '',
-        embedding: item.embedding || []
+      type IndexItem = { id?: string; source?: string; sourcePath?: string; text?: string; chunk?: string; embedding?: number[] };
+      const arr = rawAny as IndexItem[];
+      this.index = arr.map((item, i) => ({
+        id: (item && item.id) ? String(item.id) : `chunk_${i}`,
+        source: (item && (item.source || item.sourcePath)) ? String(item.source || item.sourcePath) : 'unknown',
+        text: (item && (item.text || item.chunk)) ? String(item.text || item.chunk) : '',
+        embedding: (item && Array.isArray(item.embedding)) ? (item.embedding as number[]) : []
       }));
     } catch (err) {
       console.warn('RAG: no bundled index found (src/data/rag-index.json).', err);

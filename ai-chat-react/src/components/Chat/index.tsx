@@ -229,20 +229,25 @@ export const Chat: React.FC<ChatProps> = ({ className = '' }) => {
         conversationHistory
       );
 
+      // Helper to strip any accidental success lines to avoid duplicates
+      const stripCreatedSuccess = (text: string) => {
+        const lines = text.split('\n');
+        const filtered = lines.filter(l => !/created successfully\s*:/i.test(l));
+        return filtered.join('\n').trim();
+      };
+
       const finalResponse = response.content;
 
-      // Deterministic processing detection via control mode, fallback to heuristic
-      const isProcessingStart = response.mode === 'processing_start'
-        || finalResponse.trim().endsWith("now:")
-        || finalResponse.includes("I'm creating")
-        || finalResponse.includes("I'm configuring");
+      // Deterministic processing detection via control mode only
+      const isProcessingStart = response.mode === 'processing_start';
 
       if (isProcessingStart) {
         // This is a processing start message
         addMessage({
-          text: finalResponse,
+          text: stripCreatedSuccess(finalResponse),
           sender: 'assistant', 
-          agentUsed: 'intelligent'
+          agentUsed: 'intelligent',
+          conversationState: response.conversationState
         });
 
         // Show loading for realistic processing time
@@ -266,9 +271,10 @@ export const Chat: React.FC<ChatProps> = ({ className = '' }) => {
             
             // Add completion message
             addMessage({
-              text: completionResponse.content,
+              text: stripCreatedSuccess(completionResponse.content),
               sender: 'assistant',
-              agentUsed: 'intelligent'
+              agentUsed: 'intelligent',
+              conversationState: completionResponse.conversationState
             });
 
             // Immediately continue to next logical step in a new message
@@ -287,10 +293,11 @@ export const Chat: React.FC<ChatProps> = ({ className = '' }) => {
 
             updateState({ isTyping: false });
             addMessage({
-              text: continuationResponse.content,
+              text: stripCreatedSuccess(continuationResponse.content),
               sender: 'assistant',
               agentUsed: 'intelligent',
-              suggestedActions: continuationResponse.suggestedActions
+              suggestedActions: continuationResponse.suggestedActions,
+              conversationState: continuationResponse.conversationState
             });
             
           } catch (error) {
@@ -315,7 +322,8 @@ export const Chat: React.FC<ChatProps> = ({ className = '' }) => {
         text: finalResponse,
         sender: 'assistant',
         agentUsed: 'intelligent',
-        suggestedActions: response.suggestedActions
+        suggestedActions: response.suggestedActions,
+        conversationState: response.conversationState
       });
 
     } catch (error) {

@@ -133,6 +133,7 @@ export class IntelligentAgent {
 **FORBIDDEN**: Headings, code blocks, HTML tags, horizontal rules
 **ENTITY LINKS**: Always format as [Entity Name (ID: 12345)](#) after every creation
 **CREDENTIALS**: Always show actual generated values in tables
+**PROPERTY FORMAT**: Each individual property must be its own table row or its own bullet (never combine multiple properties in one row/item). When mentioned inline, property names must be bold with a trailing colon (e.g., **Webhook URL:** https://...).
 
 ## UNIVERSAL WORKFLOW COMPLIANCE
 
@@ -184,10 +185,10 @@ Show final summary with ALL entity links:
 ## UNIVERSAL PROCESSING PATTERN
 
 **CREATION PROCESSING** (Critical for user experience):
-- When creating entities, end message with "now:" to trigger loading
-- System automatically shows typing indicator for 2.5 seconds
-- Completion message shows actual results with entity links
-- Never say "processing completed" - use specific "Client/Delivery/Account created successfully"
+- For processing start messages, set control 'mode' to 'processing_start' and optionally end with "now:".
+- System automatically shows typing indicator for ~2.5 seconds.
+- Completion message shows actual results with entity links in a single line.
+- Never say "processing completed" - use specific "Client/Delivery/Account created successfully".
 
 **CONTINUATION AUTOMATION**:
 - After ANY entity creation success → automatically continue to next logical workflow step in NEW message
@@ -218,7 +219,7 @@ CONTROL OUTPUT INSTRUCTIONS (append to every reply):
     "mode": "processing_start" | "final"
   }
 - Use empty array/object when not applicable. Do not include any extra keys.
-- Set "mode":"processing_start" only when you are signaling that you are starting processing (e.g., "I'm creating ... now:"). Use "final" in all other replies.
+- Set "mode":"processing_start" only when you are signaling that you are starting processing (e.g., "I'm creating ... now:"). Use "final" in all other replies. In 'processing_start' replies, NEVER include the "created successfully" line.
 - When completing an entity creation, the completion message must contain ONLY a single line: "Client/Delivery/Account created successfully: [Entity Name (ID: 12345)](#)".
 
 Example:

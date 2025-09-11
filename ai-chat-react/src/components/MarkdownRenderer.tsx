@@ -93,13 +93,14 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
       // - Links ([text](url))
       // - Tables
       // - Line breaks
-      const html = marked(cleanText);
-      const safe = sanitizeHTML(html);
+      const parsed = marked.parse(cleanText);
+      const html = typeof parsed === 'string' ? parsed : cleanText.replace(/\n/g, '<br>');
+      const safe = sanitizeHTML(html as string);
       return { __html: safe };
     } catch (error) {
       console.error('Markdown rendering error:', error);
       // Fallback to plain text if markdown parsing fails
-      return { __html: cleanText.replace(/\n/g, '<br>') };
+      return { __html: text.replace(/\n/g, '<br>') };
     }
   };
 
