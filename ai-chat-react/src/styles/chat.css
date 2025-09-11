@@ -423,7 +423,7 @@
 }
 
 :root {
-    --chat-panel-width: 400px;
+    --chat-panel-width: 640px;
 }
 
 body {
@@ -637,6 +637,8 @@ body.theme-switching *::after {
     top: 0;
     bottom: 0;
     width: var(--chat-panel-width);
+    min-width: 400px;
+    max-width: 640px;
     height: 100vh;
     border-left: var(--ai-chat-border-width) solid var(--ai-chat-border);
     box-shadow: var(--cui-box-shadow-sm, 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075));
