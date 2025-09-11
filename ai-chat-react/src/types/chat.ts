@@ -9,7 +9,7 @@ export interface Message {
   text: string;
   sender: 'user' | 'assistant';
   timestamp: string;
-  agentUsed?: 'tools' | 'documentation' | 'intelligent';
+  agentUsed?: 'tools' | 'documentation' | 'intelligent' | 'help' | 'workflow' | 'both';
   suggestedActions?: SuggestedAction[];
   fileUpload?: boolean;
   functionCalls?: Array<{

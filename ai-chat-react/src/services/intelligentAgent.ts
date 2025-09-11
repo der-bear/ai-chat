@@ -12,6 +12,9 @@ export interface AgentResponse {
   mode?: 'processing_start' | 'final';
   fileUpload?: boolean;
   agentType?: 'workflow' | 'help' | 'both';
+  requiresFollowUp?: boolean;
+  followUpContent?: string;
+  followUpActions?: Array<{id: string; text: string; value?: string}>;
 }
 
 export interface ConversationState {
@@ -254,17 +257,11 @@ export class IntelligentAgent {
       ];
     }
     
-    // Lead type selection with industry context
+    // Lead type selection - NO BUTTONS per instructions
     if (lowerContent.includes('what industry') || 
-        (lowerContent.includes('lead type') && lowerContent.includes('mortgage default'))) {
-      return [
-        { id: 'mortgage_default', text: '54353', value: 'Mortgage Default (54353)' },
-        { id: 'mortgage_refi', text: '98999', value: 'Mortgage Refinance (98999)' },
-        { id: 'auto_insurance', text: '76421', value: 'Auto Insurance (76421)' },
-        { id: 'personal_loan', text: '43287', value: 'Personal Loan (43287)' },
-        { id: 'credit_card', text: '19856', value: 'Credit Card (19856)' },
-        { id: 'custom', text: 'Custom', value: 'Create custom lead type' }
-      ];
+        (lowerContent.includes('lead type') && (lowerContent.includes('mortgage') || lowerContent.includes('type the id')))) {
+      // Manual ID only - no buttons for lead type selection
+      return undefined; // No suggested actions for lead type
     }
     
     // Account creation suggestion

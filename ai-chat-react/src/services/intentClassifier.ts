@@ -74,17 +74,26 @@ export class IntentClassifier {
       };
     }
 
-    // High confidence documentation questions  
-    const docTriggers = [
-      'what is leadexec', 'explain leadexec', 'what is webhook', 'explain webhook',
-      'how does the system work', 'how does api work', 'documentation', 'guide'
+    // High confidence documentation questions - handle variations
+    const normalizedMessage = lowerMessage
+      .replace(/'/g, "'")  // Normalize apostrophes
+      .replace(/[?!.,]/g, '') // Remove punctuation for matching
+      .trim();
+    
+    // Broader documentation patterns
+    const docPatterns = [
+      /^(can you |could you |please )?(explain|tell me about|describe)/i,
+      /^what (is|are|does) \w+/i,
+      /^how (does|do|can) \w+/i,
+      /what['']s (a |an |the )?(\w+)/i,
+      /(documentation|guide|help|info)/i
     ];
     
-    if (docTriggers.some(trigger => lowerMessage.includes(trigger))) {
+    if (docPatterns.some(pattern => pattern.test(normalizedMessage))) {
       return {
         intent: 'general_documentation',
         confidence: 0.95,
-        reasoning: `Message is asking for general system documentation`
+        reasoning: `Message matches documentation pattern`
       };
     }
 

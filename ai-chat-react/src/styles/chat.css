@@ -245,11 +245,11 @@
 /* Modal window */
 .ai-chat--maximized {
   position: fixed !important;
-  top: 120px !important;
+  top: 60px !important;
   left: 50% !important;
   transform: translateX(-50%) !important;
-  width: min(1200px, calc(100vw - 48px)) !important;
-  height: calc(100vh - 200px) !important;
+  width: min(1200px, calc(100vw - 24px)) !important;
+  height: calc(100vh - 100px) !important;
   z-index: 1001 !important;
   background: var(--cui-body-bg, #fff);
   border-radius: 12px;
@@ -1122,9 +1122,6 @@ body.theme-switching *::after {
 .ai-chat__avatar--assistant {
     background: var(--ai-chat-avatar-assistant-bg);
     color: var(--ai-chat-gradient-start);
-}
-
-.ai-chat__content {
 }
 
 .ai-chat__bubble {

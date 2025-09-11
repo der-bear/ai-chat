@@ -38,11 +38,19 @@ export class AgentRouter {
 
     // Use intent classifier for intelligent routing
     const intent = await this.intentClassifier.classifyIntent(message, conversationHistory);
+    console.log('Intent Classification:', { message: message.substring(0, 50), intent: intent.intent, confidence: intent.confidence });
     
-    // Determine routing based on intent
-    const isHelpQuestion = intent.intent === 'general_documentation' || 
-                          intent.intent === 'help_request' ||
-                          (intent.intent === 'workflow_contextual' && intent.confidence > 0.8);
+    // Route based on intent - workflow intents ALWAYS go to flow agent
+    const shouldRouteToHelp = (intent.intent === 'general_documentation' || 
+                               intent.intent === 'help_request') &&
+                              intent.confidence > 0.7;
+    
+    // For workflow intents, ALWAYS use flow agent
+    const isWorkflowIntent = intent.intent === 'workflow_execution' || 
+                             intent.intent === 'workflow_data_provision' ||
+                             intent.intent === 'workflow_contextual';
+    
+    const isHelpQuestion = shouldRouteToHelp && !isWorkflowIntent;
     
     if (isHelpQuestion) {
       // Save current workflow state if in active flow
@@ -55,29 +63,24 @@ export class AgentRouter {
       try {
         const helpResponse = await this.helpAgent.answerQuestion(message, conversationHistory);
         
-        // ALWAYS add continuation prompt if workflow was interrupted
-        if (this.workflowState.interrupted) {
-          const continuationPrompt = this.generateContinuationPrompt();
-          const pendingActions = this.workflowState.pendingActions;
-          
-          // Help response + Flow continuation in same message
-          return {
-            content: `${helpResponse.content}\n\n---\n\n${continuationPrompt}`,
-            conversationState: this.flowAgent.getConversationState(),
-            suggestedActions: pendingActions,
-            mode: 'final',
-            agentType: 'both' // Both agents working together
-          };
-        }
-        
-        // Only return help response if NOT in workflow
-        return {
+        // Return help response SEPARATELY
+        const helpResult: AgentResponse = {
           content: helpResponse.content,
-          conversationState: undefined,
-          suggestedActions: undefined,
+          conversationState: this.flowAgent.getConversationState(),
+          suggestedActions: undefined, // No actions during help response
           mode: 'final',
           agentType: 'help'
         };
+        
+        // If workflow was interrupted, mark for follow-up
+        if (this.workflowState.interrupted) {
+          // Store that we need a follow-up after help response
+          helpResult.requiresFollowUp = true;
+          helpResult.followUpContent = this.generateContinuationPrompt();
+          helpResult.followUpActions = this.workflowState.pendingActions;
+        }
+        
+        return helpResult;
       } catch (error) {
         // Fallback to flow agent if help agent fails
         console.warn('Help agent failed, falling back to flow agent:', error);
@@ -95,8 +98,9 @@ export class AgentRouter {
     return response;
   }
 
-  // Kept for backwards compatibility but mainly using intent classifier now
-  private isHelpQuestion(message: string, conversationHistory: Array<{role: 'user' | 'assistant', content: string}>): boolean {
+  // DEPRECATED: Kept for reference but replaced by intent classifier  
+  // @ts-ignore - Keeping for reference
+  private _legacyIsHelpQuestion(message: string, conversationHistory: Array<{role: 'user' | 'assistant', content: string}>): boolean {
     const lowerMessage = message.toLowerCase();
     const recentContext = conversationHistory.slice(-2).map(m => m.content.toLowerCase()).join(' ');
     
@@ -313,15 +317,36 @@ export class AgentRouter {
 
   private isContinuationResponse(message: string): boolean {
     const lowerMessage = message.toLowerCase();
+    
+    // Normalize common variations
+    const normalizedMessage = lowerMessage
+      .replace(/set up/g, 'setup')
+      .replace(/not yet/g, 'no')
+      .trim();
+    
+    // Comprehensive continuation patterns
     const continuationPhrases = [
-      'yes', 'proceed', 'continue', 'go ahead',
+      // Basic confirmations
+      'yes', 'no', 'proceed', 'continue', 'go ahead', 'ok', 'sure',
+      // Delivery methods (check both text and value patterns)
       'portal', 'webhook', 'email', 'ftp',
-      'auto-generate', 'custom',
-      'activate now', 'activate later',
-      'use portal', 'set up webhook', 'configure ftp'
+      'use portal', 'setup webhook', 'configure ftp',
+      // Credentials
+      'auto-generate', 'custom', 'auto', 'manual',
+      // Activation
+      'activate now', 'activate later', 'activate',
+      // File operations
+      'upload', 'skip', 'manually',
+      // Lead type IDs
+      /\b\d{5}\b/  // 5-digit IDs like 54353
     ];
     
-    return continuationPhrases.some(phrase => lowerMessage.includes(phrase));
+    return continuationPhrases.some(phrase => {
+      if (phrase instanceof RegExp) {
+        return phrase.test(normalizedMessage);
+      }
+      return normalizedMessage.includes(phrase);
+    });
   }
 
   private async resumeWorkflow(

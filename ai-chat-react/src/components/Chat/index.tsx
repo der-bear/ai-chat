@@ -349,7 +349,8 @@ export const Chat: React.FC<ChatProps> = ({ className = '' }) => {
         addMessage({
           text: finalResponse,
           sender: 'assistant',
-          agentUsed: 'intelligent'
+          agentUsed: response.agentType === 'help' ? 'help' : 
+                    response.agentType === 'both' ? 'both' : 'intelligent'
         });
 
         // Show loading for realistic processing time (small delay to ensure message renders first)
@@ -377,7 +378,8 @@ export const Chat: React.FC<ChatProps> = ({ className = '' }) => {
             addMessage({
               text: completionResponse.content,
               sender: 'assistant',
-              agentUsed: 'intelligent',
+              agentUsed: completionResponse.agentType === 'help' ? 'help' : 
+                        completionResponse.agentType === 'both' ? 'both' : 'workflow',
               suggestedActions: completionResponse.suggestedActions,
               conversationState: completionResponse.conversationState
             });
@@ -400,7 +402,8 @@ export const Chat: React.FC<ChatProps> = ({ className = '' }) => {
                 addMessage({
                   text: continuationResponse.content,
                   sender: 'assistant',
-                  agentUsed: 'intelligent',
+                  agentUsed: continuationResponse.agentType === 'help' ? 'help' : 
+                            continuationResponse.agentType === 'both' ? 'both' : 'workflow',
                   suggestedActions: continuationResponse.suggestedActions,
                   conversationState: continuationResponse.conversationState
                 });
@@ -426,7 +429,8 @@ export const Chat: React.FC<ChatProps> = ({ className = '' }) => {
                 addMessage({
                   text: continuationResponse.content,
                   sender: 'assistant',
-                  agentUsed: 'intelligent',
+                  agentUsed: continuationResponse.agentType === 'help' ? 'help' : 
+                            continuationResponse.agentType === 'both' ? 'both' : 'workflow',
                   suggestedActions: continuationResponse.suggestedActions,
                   conversationState: continuationResponse.conversationState
                 });
@@ -452,7 +456,8 @@ export const Chat: React.FC<ChatProps> = ({ className = '' }) => {
                 addMessage({
                   text: continuationResponse.content,
                   sender: 'assistant',
-                  agentUsed: 'intelligent',
+                  agentUsed: continuationResponse.agentType === 'help' ? 'help' : 
+                            continuationResponse.agentType === 'both' ? 'both' : 'workflow',
                   suggestedActions: continuationResponse.suggestedActions,
                   conversationState: continuationResponse.conversationState
                 });
@@ -480,11 +485,24 @@ export const Chat: React.FC<ChatProps> = ({ className = '' }) => {
       addMessage({
         text: finalResponse,
         sender: 'assistant',
-        agentUsed: 'intelligent',
+        agentUsed: response.agentType === 'help' ? 'help' : 
+                  response.agentType === 'both' ? 'both' : 'workflow',
         suggestedActions: response.suggestedActions,
         conversationState: response.conversationState,
         fileUpload: response.fileUpload
       });
+      
+      // Handle follow-up if needed (separate message for workflow continuation)
+      if (response.requiresFollowUp && response.followUpContent) {
+        setTimeout(() => {
+          addMessage({
+            text: response.followUpContent!, // Already checked it exists above
+            sender: 'assistant',
+            agentUsed: 'workflow', // Follow-up is always workflow
+            suggestedActions: response.followUpActions
+          });
+        }, 500); // Small delay to show as separate message
+      }
 
     } catch (error) {
       console.error('Error sending message:', error);
