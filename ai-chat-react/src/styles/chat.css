@@ -248,7 +248,7 @@
   top: 120px !important;
   left: 50% !important;
   transform: translateX(-50%) !important;
-  width: min(800px, calc(100vw - 128px)) !important;
+  width: min(1200px, calc(100vw - 48px)) !important;
   height: calc(100vh - 200px) !important;
   z-index: 1001 !important;
   background: var(--cui-body-bg, #fff);

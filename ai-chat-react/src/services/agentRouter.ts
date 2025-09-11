@@ -17,10 +17,6 @@ export class AgentRouter {
     this.helpAgent = new HelpAgent();
   }
 
-  setClientCreateFlow(flow: string) {
-    this.flowAgent.setClientCreateFlow(flow);
-  }
-
   setAgentInstructions(instructions: string) {
     this.flowAgent.setAgentInstructions(instructions);
   }

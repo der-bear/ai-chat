@@ -22,7 +22,6 @@ export interface ConversationState {
 export class IntelligentAgent {
   private client: OpenAI;
   private rag: RagService;
-  private clientCreateFlow: string = '';
   private agentInstructions: string = '';
   private conversationState: ConversationState = {};
 
@@ -41,10 +40,6 @@ export class IntelligentAgent {
     this.rag.loadIndexFromBundle().catch(() => {});
   }
 
-  setClientCreateFlow(flow: string) {
-    this.clientCreateFlow = flow;
-  }
-
   setAgentInstructions(instructions: string) {
     this.agentInstructions = instructions;
   }
@@ -58,7 +53,7 @@ export class IntelligentAgent {
         {
           role: 'system',
           content: this.agentInstructions
-            ? `AGENT INSTRUCTIONS (canonical)\n${this.agentInstructions}\n\nCurrent state: ${JSON.stringify(this.conversationState)}\n\nCOMPLETE WORKFLOW SPECIFICATION:\n${this.clientCreateFlow}\n`
+            ? `${this.agentInstructions}\n\nCurrent conversation state: ${JSON.stringify(this.conversationState)}`
             : `You are a LeadExec Copilot. Agent instructions not loaded - using fallback mode.`
         }
       ];

@@ -15,10 +15,6 @@ export class OpenAIService {
     // No need to manually set it
   }
 
-  setClientCreateFlow(flow: string) {
-    this.router.setClientCreateFlow(flow);
-  }
-
   setAgentInstructions(instructions: string) {
     this.router.setAgentInstructions(instructions);
   }

@@ -53,7 +53,6 @@ export const Chat: React.FC<ChatProps> = ({ className = '' }) => {
     
     const service = new OpenAIService();
     service.setDocumentation();
-    service.setClientCreateFlow(clientCreateFlowContent);
     service.setAgentInstructions(agentInstructionsContent);
     return service;
   });
