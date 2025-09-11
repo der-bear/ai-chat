@@ -22,11 +22,10 @@ export class RagService {
     try {
       // Attempt to import the JSON index if it exists
       // This will work in Vite dev/build and Node if the file is present
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      // Use require here but guard with try/catch in case file missing
-      // @ts-ignore
+      // Use dynamic import but guard with try/catch in case file missing
+      // @ts-expect-error - Dynamic import of JSON
       const mod = await import('../data/rag-index.json');
-      const raw: Array<any> = mod?.default || mod;
+      const raw: Array<unknown> = mod?.default || mod;
       if (!Array.isArray(raw)) {
         this.index = [];
         return;

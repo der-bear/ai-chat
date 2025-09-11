@@ -20,7 +20,6 @@ export const ChatInitial: React.FC<ChatInitialProps> = ({ onSendMessage, isTypin
     
     // Calculate new height
     const maxHeight = 120;
-    const minHeight = 48;
     const newHeight = Math.min(textarea.scrollHeight, maxHeight);
     
     // Apply new height

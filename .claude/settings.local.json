@@ -17,7 +17,10 @@
       "Bash(npm run build:rag:*)",
       "Bash(OPENAI_API_KEY=$VITE_OPENAI_API_KEY npm run build:rag)",
       "Bash(find:*)",
-      "Bash(npm audit:*)"
+      "Bash(npm audit:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run lint)",
+      "WebFetch(domain:www.figma.com)"
     ],
     "deny": [],
     "ask": []

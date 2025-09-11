@@ -1,12 +1,16 @@
 import React, { useEffect, useRef } from 'react';
 import type { Message } from '../../hooks/useChatState';
+import MarkdownRenderer from '../MarkdownRenderer';
+import SuggestedActions from './SuggestedActions';
+import type { SuggestedAction } from '../../types/chat';
 
 interface ChatMessagesProps {
   messages: Message[];
   isTyping: boolean;
+  onSuggestedActionClick?: (action: SuggestedAction) => void;
 }
 
-export const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, isTyping }) => {
+export const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, isTyping, onSuggestedActionClick }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -59,12 +63,23 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, isTyping }
           </div>
           <div className="ai-chat__content">
             <div className={`ai-chat__bubble ai-chat__bubble--${message.sender}`}>
-              {formatMessageText(message.text)}
+              {message.sender === 'assistant' ? (
+                <MarkdownRenderer content={message.text} />
+              ) : (
+                formatMessageText(message.text)
+              )}
             </div>
             {message.agentUsed && (
               <div className="ai-chat__agent-indicator">
                 via {message.agentUsed} agent
               </div>
+            )}
+            {message.suggestedActions && message.suggestedActions.length > 0 && onSuggestedActionClick && (
+              <SuggestedActions
+                actions={message.suggestedActions}
+                onActionClick={onSuggestedActionClick}
+                disabled={isTyping}
+              />
             )}
           </div>
         </div>

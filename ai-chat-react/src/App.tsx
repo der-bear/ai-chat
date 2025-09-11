@@ -1,4 +1,3 @@
-import React from 'react';
 import { Chat } from './components/Chat';
 import { DarkModeToggle } from './components/DarkModeToggle';
 import './styles/chat.css';

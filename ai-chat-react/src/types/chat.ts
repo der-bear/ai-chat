@@ -1,10 +1,27 @@
+export interface SuggestedAction {
+  id: string;
+  text: string;
+  value?: string;
+}
+
 export interface Message {
   id: string;
   text: string;
   sender: 'user' | 'assistant';
   timestamp: string;
-  agentUsed?: 'tools' | 'documentation';
-  toolCalls?: any[];
+  agentUsed?: 'tools' | 'documentation' | 'intelligent';
+  suggestedActions?: SuggestedAction[];
+  functionCalls?: Array<{
+    name: string;
+    arguments: Record<string, unknown>;
+    result?: unknown;
+  }>;
+  conversationState?: {
+    activeWorkflow?: string;
+    workflowStep?: string;
+    collectedData?: Record<string, unknown>;
+    context?: string[];
+  };
 }
 
 export interface Conversation {

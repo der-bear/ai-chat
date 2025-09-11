@@ -5,8 +5,8 @@ export interface Message {
   text: string;
   sender: 'user' | 'assistant';
   timestamp: string;
-  agentUsed?: 'tools' | 'documentation';
-  toolCalls?: any[];
+  agentUsed?: 'tools' | 'documentation' | 'intelligent';
+  toolCalls?: Array<Record<string, unknown>>;
 }
 
 export interface Conversation {

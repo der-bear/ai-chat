@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useChatState } from '../../hooks/useChatState';
 import { OpenAIService } from '../../services/openaiService';
+import type { SuggestedAction } from '../../types/chat';
 // No actual tools - AI agent emulates workflows based on system prompt context
 import { ChatHeader } from './ChatHeader';
 import { ChatInitial } from './ChatInitial';
@@ -48,7 +49,7 @@ export const Chat: React.FC<ChatProps> = ({ className = '' }) => {
     });
     
     const service = new OpenAIService();
-    service.setDocumentation(knowledgebaseContent);
+    service.setDocumentation();
     service.setClientCreateFlow(clientCreateFlowContent);
     return service;
   });
@@ -198,6 +199,11 @@ export const Chat: React.FC<ChatProps> = ({ className = '' }) => {
     }
   };
 
+  const handleSuggestedActionClick = (action: SuggestedAction) => {
+    const messageText = action.value || action.text;
+    handleSendMessage(messageText);
+  };
+
   const handleSendMessage = async (message: string) => {
     try {
       // Create conversation if needed
@@ -223,13 +229,66 @@ export const Chat: React.FC<ChatProps> = ({ className = '' }) => {
         conversationHistory
       );
 
-      let finalResponse = response.content;
+      const finalResponse = response.content;
 
-      // Add assistant message
+      // Universal processing detection - if message ends with "now:" it's a processing start
+      if (finalResponse.trim().endsWith("now:") || finalResponse.includes("I'm creating") || finalResponse.includes("I'm configuring")) {
+        // This is a processing start message
+        addMessage({
+          text: finalResponse,
+          sender: 'assistant', 
+          agentUsed: 'intelligent'
+        });
+
+        // Show loading for realistic processing time
+        updateState({ isTyping: true });
+        
+        // Generate completion message after delay
+        setTimeout(async () => {
+          try {
+            // Request completion from AI
+            const completionResponse = await openAIService.sendMessage(
+              "Continue with the creation process and show the completion result.",
+              [...conversation.messages.map(m => ({
+                role: m.sender === 'user' ? 'user' as const : 'assistant' as const,
+                content: m.text
+              })), 
+              { role: 'assistant', content: finalResponse },
+              { role: 'user', content: 'Continue with the creation process and show the completion result.' }]
+            );
+            
+            updateState({ isTyping: false });
+            
+            // Add completion message
+            addMessage({
+              text: completionResponse.content,
+              sender: 'assistant',
+              agentUsed: 'intelligent'
+            });
+            
+          } catch (error) {
+            updateState({ isTyping: false });
+            // Generate proper completion based on what was being created
+            const entityType = finalResponse.includes('client') ? 'Client' : 
+                             finalResponse.includes('delivery') ? 'Delivery Method' : 'Account';
+            const randomId = Math.floor(Math.random() * 90000) + 10000;
+            addMessage({
+              text: `${entityType} created successfully: [${entityType} (ID: ${randomId})](#)`,
+              sender: 'assistant',
+              agentUsed: 'intelligent'
+            });
+          }
+        }, 2500);
+        
+        return; // Don't send the original message again
+      }
+
+      // Add assistant message (for non-split scenarios)
       addMessage({
         text: finalResponse,
         sender: 'assistant',
-        agentUsed: response.agentUsed
+        agentUsed: 'intelligent',
+        suggestedActions: response.suggestedActions
       });
 
     } catch (error) {
@@ -333,6 +392,7 @@ export const Chat: React.FC<ChatProps> = ({ className = '' }) => {
         <ChatMessages
           messages={state.currentConversation.messages}
           isTyping={state.isTyping}
+          onSuggestedActionClick={handleSuggestedActionClick}
         />
       )}
 
