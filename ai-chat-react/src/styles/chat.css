@@ -257,6 +257,11 @@
   overflow: hidden;
 }
 
+/* Hide resize handle in modal mode */
+.ai-chat--maximized .ai-chat__resize-handle {
+  display: none !important;
+}
+
 /* Ensure dark mode toggle stays above backdrop */
 .dark-mode-toggle {
   z-index: 10000 !important;
@@ -638,7 +643,7 @@ body.theme-switching *::after {
     bottom: 0;
     width: var(--chat-panel-width);
     min-width: 400px;
-    max-width: 640px;
+    max-width: 1200px;
     height: 100vh;
     border-left: var(--ai-chat-border-width) solid var(--ai-chat-border);
     box-shadow: var(--cui-box-shadow-sm, 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075));

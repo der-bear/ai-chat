@@ -117,7 +117,7 @@ export const Chat: React.FC<ChatProps> = ({ className = '' }) => {
     if (!resizeHandle) return;
 
     const startResize = (e: MouseEvent | TouchEvent) => {
-      if (state.isMinimized || resizeStateRef.current.isResizing) return;
+      if (state.isMinimized || state.isMaximized || resizeStateRef.current.isResizing) return;
 
       const clientX = 'clientX' in e ? e.clientX : e.touches?.[0]?.clientX;
       if (clientX === undefined) return;
@@ -340,9 +340,11 @@ export const Chat: React.FC<ChatProps> = ({ className = '' }) => {
 
       const finalResponse = response.content;
 
-      // Smart processing detection
-      const isProcessingStart = (finalResponse.includes("I'm creating") && finalResponse.trim().endsWith("now:")) ||
-                               finalResponse.includes("I'm configuring") && finalResponse.trim().endsWith("now:");
+      // Use control mode primarily; fallback to legacy heuristics
+      const isProcessingStart =
+        response.mode === 'processing_start' ||
+        ((finalResponse.includes("I'm creating") || finalResponse.includes("I'm configuring")) &&
+          finalResponse.trim().endsWith("now:"));
 
       if (isProcessingStart) {
         // Show the processing start message first

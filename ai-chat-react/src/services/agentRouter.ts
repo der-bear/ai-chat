@@ -40,16 +40,24 @@ export class AgentRouter {
     const intent = await this.intentClassifier.classifyIntent(message, conversationHistory);
     console.log('Intent Classification:', { message: message.substring(0, 50), intent: intent.intent, confidence: intent.confidence });
     
-    // Route based on intent - workflow intents ALWAYS go to flow agent
+    // VERY restrictive help routing - minimize workflow interruption
+    const inActiveWorkflow = this.isInActiveWorkflow(conversationHistory);
+    
+    // Only route to help if:
+    // 1. Explicitly requesting help/documentation AND
+    // 2. High confidence (>0.85) AND  
+    // 3. NOT in active workflow OR very explicit help request
     const shouldRouteToHelp = (intent.intent === 'general_documentation' || 
                                intent.intent === 'help_request') &&
-                              intent.confidence > 0.7;
+                              intent.confidence > 0.85 &&
+                              (!inActiveWorkflow || message.toLowerCase().includes('help'));
     
-    // For workflow intents, ALWAYS use flow agent
+    // For workflow intents, ALWAYS use flow agent (no exceptions)
     const isWorkflowIntent = intent.intent === 'workflow_execution' || 
                              intent.intent === 'workflow_data_provision' ||
                              intent.intent === 'workflow_contextual';
     
+    // Final decision: help only if explicitly requested and not workflow intent
     const isHelpQuestion = shouldRouteToHelp && !isWorkflowIntent;
     
     if (isHelpQuestion) {

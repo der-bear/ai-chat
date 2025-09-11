@@ -74,26 +74,33 @@ export class IntentClassifier {
       };
     }
 
-    // High confidence documentation questions - handle variations
+    // VERY restrictive documentation routing - minimize workflow interruption
     const normalizedMessage = lowerMessage
       .replace(/'/g, "'")  // Normalize apostrophes
       .replace(/[?!.,]/g, '') // Remove punctuation for matching
       .trim();
     
-    // Broader documentation patterns
-    const docPatterns = [
-      /^(can you |could you |please )?(explain|tell me about|describe)/i,
-      /^what (is|are|does) \w+/i,
-      /^how (does|do|can) \w+/i,
-      /what['']s (a |an |the )?(\w+)/i,
-      /(documentation|guide|help|info)/i
+    // Only route to help if EXPLICITLY asking for help AND outside workflow context
+    const explicitHelpTriggers = [
+      'help', 'documentation', 'guide', 'explain to me', 'i need help'
     ];
     
-    if (docPatterns.some(pattern => pattern.test(normalizedMessage))) {
+    // Must contain explicit help request
+    const hasExplicitHelp = explicitHelpTriggers.some(trigger => lowerMessage.includes(trigger));
+    
+    // Conservative documentation patterns - only very explicit requests
+    const conservativeDocPatterns = [
+      /^(help|documentation|guide)/i,  // Must start with help/doc/guide
+      /what is leadexec/i,             // System-specific questions only
+      /how does leadexec work/i,
+      /leadexec documentation/i
+    ];
+    
+    if (hasExplicitHelp && conservativeDocPatterns.some(pattern => pattern.test(normalizedMessage))) {
       return {
         intent: 'general_documentation',
-        confidence: 0.95,
-        reasoning: `Message matches documentation pattern`
+        confidence: 0.85,  // Lower confidence to be more cautious
+        reasoning: `Explicit help request detected: "${lowerMessage}"`
       };
     }
 
@@ -160,11 +167,18 @@ INTENT OPTIONS:
 3. general_documentation - User wants general system explanations (what is X, how does Y work)
 4. help_request - User explicitly needs help or assistance
 
+CRITICAL RULES (MINIMIZE WORKFLOW INTERRUPTION):
+- ALWAYS prioritize workflow_execution/workflow_contextual/workflow_data_provision over documentation
+- If context shows ANY workflow activity ("client setup", "delivery method", "shall I proceed"), assume workflow intent
+- Only use general_documentation if user EXPLICITLY says "help", "documentation", or "explain" AND no workflow context
+- Questions during active workflow should be workflow_contextual, NOT general_documentation
+- When in doubt, choose workflow intent to avoid interruption
+
 WORKFLOW INDICATORS:
-- If context shows "client setup", "delivery method", "shall I proceed", user is likely in active workflow
-- Questions like "which properties" during workflow = workflow_contextual
-- Questions like "what is webhook" without workflow context = general_documentation
 - Commands like "create", "proceed", "upload" = workflow_execution
+- Questions during workflow = workflow_contextual  
+- Data provision during workflow = workflow_data_provision
+- Only explicit help requests outside workflow = general_documentation
 
 Respond with JSON only:
 {
