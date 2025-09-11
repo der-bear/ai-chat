@@ -47,20 +47,22 @@ export class AgentRouter {
       try {
         const helpResponse = await this.helpAgent.answerQuestion(message, conversationHistory);
         
-        // If workflow was interrupted, add continuation prompt
+        // ALWAYS add continuation prompt if workflow was interrupted
         if (this.workflowState.interrupted) {
           const continuationPrompt = this.generateContinuationPrompt();
           const pendingActions = this.workflowState.pendingActions;
           
+          // Help response + Flow continuation in same message
           return {
-            content: `${helpResponse.content}\n\n${continuationPrompt}`,
+            content: `${helpResponse.content}\n\n---\n\n${continuationPrompt}`,
             conversationState: this.flowAgent.getConversationState(),
             suggestedActions: pendingActions,
             mode: 'final',
-            agentType: 'help'
+            agentType: 'both' // Both agents working together
           };
         }
         
+        // Only return help response if NOT in workflow
         return {
           content: helpResponse.content,
           conversationState: undefined,
@@ -162,26 +164,29 @@ export class AgentRouter {
       return true;
     }
 
-    // If in active workflow, allow help for EXPLICIT questions only, not data provision
+    // If in active workflow, intelligently determine if help is needed
     if (inWorkflow) {
-      // Allow help for explicit documentation questions like "what is webhook"
+      // Explicit documentation questions that should route to help
       const explicitHelpQuestions = lowerMessage.startsWith('what is ') || 
                                    lowerMessage.startsWith('what are ') ||
                                    lowerMessage.startsWith('what does ') ||
                                    lowerMessage.startsWith('how does ') ||
                                    lowerMessage.startsWith('explain ') ||
-                                   lowerMessage.includes('documentation');
+                                   lowerMessage.includes('documentation') ||
+                                   lowerMessage.includes('help');
       
-      // If providing data (company name, details, etc.) - NEVER route to help
-      const isProvidingData = lowerMessage.length > 10 && 
-                             !lowerMessage.includes('?') &&
-                             !explicitHelpQuestions;
+      // User is providing workflow data (company info, selections, etc.)
+      const providingWorkflowData = !lowerMessage.includes('?') && 
+                                   lowerMessage.length > 5 &&
+                                   !explicitHelpQuestions;
       
-      if (isProvidingData) {
-        return false; // Stay in workflow for data provision
+      // Always stay in workflow for data provision
+      if (providingWorkflowData) {
+        return false;
       }
       
-      return explicitHelpQuestions; // Allow help only for explicit questions
+      // Allow help for explicit questions, flow agent will follow up
+      return explicitHelpQuestions;
     }
 
     // Check for help question patterns

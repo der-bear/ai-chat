@@ -11,7 +11,7 @@ export interface AgentResponse {
   }>;
   mode?: 'processing_start' | 'final';
   fileUpload?: boolean;
-  agentType?: 'workflow' | 'help';
+  agentType?: 'workflow' | 'help' | 'both';
 }
 
 export interface ConversationState {
