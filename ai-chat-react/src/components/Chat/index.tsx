@@ -60,7 +60,7 @@ export const Chat: React.FC<ChatProps> = ({ className = '' }) => {
       id: 'create-single-client',
       icon: 'cil-user-plus',
       title: 'Create Single Client',
-      description: 'Set up a new client with automated configuration including delivery methods and credentials.',
+      description: 'Sets up a lead buyer with company details, credentials, and delivery configuration.',
       isNew: true,
       category: 'Category A'
     },
@@ -68,15 +68,23 @@ export const Chat: React.FC<ChatProps> = ({ className = '' }) => {
       id: 'create-multiple-clients',
       icon: 'cil-people',
       title: 'Create Multiple Clients',
-      description: 'Import and set up multiple clients at once from CSV or Excel files.',
+      description: 'Bulk imports lead buyers from CSV/Excel files to create multiple customers.',
       disabled: true,
       category: 'Category A'
     },
     {
-      id: 'clients-insights',
-      icon: 'cil-chart-pie',
-      title: 'Clients Insights',
-      description: 'View analytics, performance metrics, and lead distribution across all clients.',
+      id: 'setup-delivery-method',
+      icon: 'cil-send',
+      title: 'Setup Delivery Method',
+      description: 'Configures how leads are sent to clients (Webhook, Email, SMS, Portal).',
+      disabled: true,
+      category: 'Category A'
+    },
+    {
+      id: 'setup-delivery-account',
+      icon: 'cil-settings',
+      title: 'Setup Delivery Account',
+      description: 'Defines lead types, qualification criteria, and distribution rules for a client.',
       disabled: true,
       category: 'Category A'
     },

@@ -41,6 +41,7 @@ export interface ChatState {
   isMinimized: boolean;
   isMaximized: boolean;
   isHistoryActive: boolean;
+  isShowAllActive: boolean;
   panelWidth: number;
 }
 

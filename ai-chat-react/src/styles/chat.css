@@ -414,7 +414,6 @@
   align-items: center;
   gap: 1.5rem;
   width: 100%;
-  margin-top: 3rem;  /* 48px gap between logo and tools */
   container-type: inline-size;
   container-name: cards-wrapper;
 }
@@ -1399,7 +1398,7 @@ body.theme-switching *::after {
     align-items: center;
     justify-content: center;
     padding: 32px 24px;
-    gap: 48px;
+    gap: 3rem;  /* 48px gap between logo section and cards */
 }
 
 .ai-chat--initial-state:not(.ai-chat--history-active):not(.ai-chat--show-all-active) .ai-chat__initial {
@@ -1410,8 +1409,7 @@ body.theme-switching *::after {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 24px;
-    margin-bottom: 48px;
+    gap: 1.5rem;  /* 24px between logo and title */
 }
 
 .ai-chat__logo {

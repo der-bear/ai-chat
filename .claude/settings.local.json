@@ -27,7 +27,11 @@
       "Bash(git push:*)",
       "WebFetch(domain:github.com)",
       "Bash(curl:*)",
-      "Bash(git pull:*)"
+      "Bash(git pull:*)",
+      "mcp__figma-remote-mcp__get_metadata",
+      "mcp__figma-remote-mcp__get_code",
+      "Bash(git stash:*)",
+      "mcp__figma-remote-mcp__get_screenshot"
     ],
     "deny": [],
     "ask": []

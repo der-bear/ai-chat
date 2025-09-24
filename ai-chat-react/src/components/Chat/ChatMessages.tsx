@@ -8,11 +8,12 @@ import type { SuggestedAction } from '../../types/chat';
 interface ChatMessagesProps {
   messages: Message[];
   isTyping: boolean;
+  conversationId?: string;
   onSuggestedActionClick?: (action: SuggestedAction) => void;
   onFileUpload?: (file: File, content: string) => void;
 }
 
-export const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, isTyping, onSuggestedActionClick, onFileUpload }) => {
+export const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, isTyping, conversationId, onSuggestedActionClick, onFileUpload }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -55,6 +56,13 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, isTyping, 
 
   return (
     <main className="ai-chat__messages">
+      {/* Session ID for debugging - only show if there are messages */}
+      {messages.length > 0 && conversationId && (
+        <div className="ai-chat__session-header">
+          <span className="ai-chat__session-id">{conversationId}</span>
+        </div>
+      )}
+
       {messages.map((message, index) => (
         <div
           key={message.id}

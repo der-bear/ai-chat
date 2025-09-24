@@ -19,8 +19,6 @@ export interface SearchableListProps<T extends SearchableListItem> {
 
 export function SearchableList<T extends SearchableListItem>({
   items,
-  title = 'All Tools & Flows',
-  icon = 'cil-apps',
   searchPlaceholder = 'Search...',
   emptyMessage = 'No items found',
   onItemClick,

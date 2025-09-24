@@ -18,7 +18,7 @@ export const ChatInitial: React.FC<ChatInitialProps> = ({ onSendMessage, onFlowT
       id: 'create-single-client',
       icon: 'cil-user-plus',
       title: 'Create Single Client',
-      description: 'Set up a new client with automated configuration including delivery methods and credentials.',
+      description: 'Sets up a lead buyer with company details, credentials, and delivery configuration.',
       isNew: true,
       action: () => onFlowTrigger ? onFlowTrigger('Create Single Client') : onSendMessage('Create Single Client')
     },
@@ -26,21 +26,14 @@ export const ChatInitial: React.FC<ChatInitialProps> = ({ onSendMessage, onFlowT
       id: 'create-multiple-clients',
       icon: 'cil-people',
       title: 'Create Multiple Clients',
-      description: 'Import and set up multiple clients at once from CSV or Excel files.',
+      description: 'Bulk imports lead buyers from CSV/Excel files to create multiple customers.',
       disabled: true
     },
     {
-      id: 'clients-insights',
-      icon: 'cil-chart-pie',
-      title: 'Clients Insights',
-      description: 'View analytics, performance metrics, and lead distribution across all clients.',
-      disabled: true
-    },
-    {
-      id: 'flow-4',
-      icon: 'cil-bolt',
-      title: 'Another Flow',
-      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.',
+      id: 'setup-delivery-method',
+      icon: 'cil-send',
+      title: 'Setup Delivery Method',
+      description: 'Configures how leads are sent to clients (Webhook, Email, SMS, Portal).',
       disabled: true
     },
     {

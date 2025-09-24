@@ -21,6 +21,7 @@ export const useChatState = (config: Partial<ChatConfig> = {}) => {
     isMinimized: false,
     isMaximized: false,
     isHistoryActive: false,
+    isShowAllActive: false,
     panelWidth: 400
   });
 
