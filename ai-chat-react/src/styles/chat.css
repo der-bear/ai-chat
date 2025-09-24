@@ -204,69 +204,18 @@
 }
 
 /* ========================================
-   SUGGESTED ACTIONS
+   SUGGESTED ACTIONS - Using pill button design
    ======================================== */
-.suggested-actions {
+.ai-chat__suggested-actions {
   margin: 0.75rem 0 0.5rem 0;
   padding: 0;
 }
 
-.suggested-actions__container {
+.ai-chat__suggested-actions-container {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
   align-items: flex-start;
-}
-
-.suggested-actions__button {
-  background: var(--cui-white, #fff);
-  border: 1px solid var(--cui-border-color, #d8dbe0);
-  border-radius: 1.5rem;
-  color: var(--cui-body-color, #212529);
-  cursor: pointer;
-  font-size: 0.875rem;
-  font-weight: 500;
-  padding: 0.375rem 0.75rem;
-  transition: all 0.15s ease-in-out;
-  white-space: nowrap;
-  max-width: 200px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.suggested-actions__button:hover:not(:disabled) {
-  background: var(--cui-gray-100, #f8f9fa);
-  border-color: var(--cui-primary, #0d6efd);
-  color: var(--cui-primary, #0d6efd);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.suggested-actions__button:disabled {
-  background: var(--cui-gray-200, #e9ecef);
-  border-color: var(--cui-gray-300, #dee2e6);
-  color: var(--cui-gray-500, #6c757d);
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-/* Dark mode support */
-[data-coreui-theme="dark"] .suggested-actions__button {
-  background: var(--cui-gray-800, #343a40);
-  border-color: var(--cui-gray-700, #495057);
-  color: var(--cui-gray-100, #f8f9fa);
-}
-
-[data-coreui-theme="dark"] .suggested-actions__button:hover:not(:disabled) {
-  background: var(--cui-gray-700, #495057);
-  border-color: var(--cui-primary, #0d6efd);
-  color: var(--cui-primary, #0d6efd);
-}
-
-[data-coreui-theme="dark"] .suggested-actions__button:disabled {
-  background: var(--cui-gray-900, #212529);
-  border-color: var(--cui-gray-800, #343a40);
-  color: var(--cui-gray-600, #6c757d);
 }
 
 /* ========================================
@@ -322,51 +271,114 @@
 .ai-chat__tool-pill {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.375rem 0.75rem;
-  border: 1px solid var(--cui-border-color, #d8dbe0);
-  border-radius: 1.5rem;
-  background: var(--cui-white, #fff);
-  color: var(--cui-body-color, #212529);
-  font-size: 0.875rem;
-  font-weight: 500;
+  justify-content: center;
+  gap: 0.625rem;  /* 10px gap from Figma */
+  padding: 0.375rem 0.75rem;  /* 6px 12px from Figma */
+  border: 1px solid var(--ai-interactive-border-default);
+  border-radius: 9999px;  /* Full rounded from Figma */
+  background: transparent;
+  color: var(--ai-chat-color);
+  font-family: 'Roboto', var(--ai-chat-font-family);
+  font-size: 0.875rem;  /* 14px from Figma */
+  font-weight: 400;  /* Regular weight from Figma */
+  line-height: 1.43;  /* 20px/14px from Figma */
   cursor: pointer;
-  transition: all 0.15s ease-in-out;
+  transition: background-color 0.075s ease, border-color 0.075s ease;
   white-space: nowrap;
-  max-width: 200px;
-  overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .ai-chat__tool-pill:hover:not(:disabled) {
-  background: var(--cui-gray-100, #f8f9fa);
-  border-color: var(--cui-primary, #0d6efd);
-  color: var(--cui-primary, #0d6efd);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: var(--ai-interactive-bg-hover);
+  border-color: var(--ai-interactive-border-hover);
+  color: var(--ai-chat-color);
+}
+
+.ai-chat__tool-pill:active:not(:disabled) {
+  background: var(--ai-interactive-bg-active);
+  border-color: var(--ai-interactive-border-active);
+  color: var(--ai-text-emphasis);
+}
+
+.ai-chat__tool-pill:focus-visible {
+  outline: 2px solid var(--ai-primary);
+  outline-offset: 2px;
 }
 
 .ai-chat__tool-pill:disabled {
-  background: var(--cui-gray-200, #e9ecef);
-  border-color: var(--cui-gray-300, #dee2e6);
-  color: var(--cui-gray-500, #6c757d);
   cursor: not-allowed;
-  opacity: 0.6;
+  opacity: var(--ai-interactive-opacity-disabled);  /* 0.35 from Figma */
+}
+
+/* Allow disabled pills to still have hover states */
+.ai-chat__tool-pill:disabled:hover {
+  background: var(--ai-interactive-bg-hover);
+  border-color: var(--ai-interactive-border-hover);
+  color: var(--ai-chat-color);
+}
+
+/* Selected state for pill buttons - purple background like active */
+.ai-chat__tool-pill--selected,
+.ai-chat__tool-pill--selected:hover {
+  background: var(--ai-interactive-bg-active);
+  border-color: var(--ai-interactive-border-active);
+  color: var(--ai-text-emphasis);
 }
 
 .ai-chat__tool-pill i {
   font-size: 1rem;
 }
 
-/* Dark mode support */
+/* Dark mode support - uses shared tokens */
 [data-coreui-theme="dark"] .ai-chat__tool-pill {
-  background: var(--cui-gray-800, #343a40);
-  border-color: var(--cui-gray-700, #495057);
-  color: var(--cui-gray-100, #f8f9fa);
+  background: transparent;
+  border-color: var(--ai-interactive-border-default);
+  color: var(--ai-chat-color);
 }
 
 [data-coreui-theme="dark"] .ai-chat__tool-pill:hover:not(:disabled) {
-  background: var(--cui-gray-700, #495057);
+  background: var(--ai-interactive-bg-hover);
+  border-color: var(--ai-interactive-border-hover);
+  color: var(--ai-chat-color);
+}
+
+[data-coreui-theme="dark"] .ai-chat__tool-pill:active:not(:disabled) {
+  background: var(--ai-interactive-bg-active);
+  border-color: var(--ai-interactive-border-active);
+  color: var(--ai-text-emphasis);
+}
+
+/* Dark mode - disabled hover and selected states */
+[data-coreui-theme="dark"] .ai-chat__tool-pill:disabled:hover {
+  background: var(--ai-interactive-bg-hover);
+  border-color: var(--ai-interactive-border-hover);
+  color: var(--ai-chat-color);
+}
+
+[data-coreui-theme="dark"] .ai-chat__tool-pill--selected,
+[data-coreui-theme="dark"] .ai-chat__tool-pill--selected:hover {
+  background: var(--ai-interactive-bg-active);
+  border-color: var(--ai-interactive-border-active);
+  color: var(--ai-text-emphasis);
+}
+
+/* Dark mode for action cards - use subtle translucent borders */
+[data-coreui-theme="dark"] .ai-chat__action-card {
+  border-color: var(--ai-interactive-border-default);  /* Use the subtle translucent border */
+}
+
+[data-coreui-theme="dark"] .ai-chat__action-card--vertical:hover:not(:disabled),
+[data-coreui-theme="dark"] .ai-chat__action-card--horizontal:hover:not(:disabled) {
+  background: var(--ai-interactive-bg-hover);  /* Use consistent hover bg */
+  border-color: var(--ai-interactive-border-hover);  /* Use consistent hover border */
+}
+
+[data-coreui-theme="dark"] .ai-chat__action-card--vertical.ai-chat__action-card--selected,
+[data-coreui-theme="dark"] .ai-chat__action-card--horizontal.ai-chat__action-card--selected,
+[data-coreui-theme="dark"] .ai-chat__action-card--vertical:active:not(:disabled),
+[data-coreui-theme="dark"] .ai-chat__action-card--horizontal:active:not(:disabled) {
+  background: var(--ai-interactive-bg-active);  /* Use consistent active bg */
+  border-color: var(--ai-interactive-border-active);  /* Use consistent active border */
 }
 
 /* File Upload Component */
@@ -380,8 +392,476 @@
   padding: 1.5rem 1rem;
   text-align: center;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.1s ease;
   background: transparent;
+}
+
+/* ========================================
+   ACTION CARDS
+   ======================================== */
+.ai-chat__initial-cards-wrapper {
+  --card-gap: 1rem;  /* 16px gap from Figma */
+  --card-padding: 1rem;  /* 16px padding from Figma */
+  --card-flex-direction: column;
+  --card-align-items: flex-start;
+  --card-icon-size: 1.5rem;  /* 24px icon from Figma */
+  --card-title-size: 0.875rem;  /* 14px from Figma */
+  --card-desc-size: 0.75rem;  /* 12px from Figma */
+  --card-desc-line-clamp: 2;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  width: 100%;
+  margin-top: 3rem;  /* 48px gap between logo and tools */
+  container-type: inline-size;
+  container-name: cards-wrapper;
+}
+
+.ai-chat__action-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  width: 100%;
+  max-width: 900px;
+}
+
+.ai-chat__action-cards--collapsed {
+  max-height: none;
+  overflow: visible;
+  position: relative;
+}
+
+
+/* Base card styles - Exact Figma specs */
+.ai-chat__action-card {
+  display: flex;
+  background: var(--ai-chat-bg);
+  border: 1px solid #d8dbe0;  /* Exact border color from Figma */
+  border-radius: 0.25rem;  /* 4px from Figma */
+  cursor: pointer;
+  transition: all 0.075s ease;
+  position: relative;
+  text-align: left;
+  width: 100%;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  padding: 0;
+  appearance: none;
+  overflow: visible; /* Allow NEW badge to show */
+  min-height: auto;
+}
+
+/* Vertical layout (default) - Exact Figma structure */
+.ai-chat__action-card--vertical {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 1rem;  /* 16px gap between icon and text */
+  padding: 1rem;  /* 16px padding */
+}
+
+/* Horizontal layout - Exact Figma structure */
+.ai-chat__action-card--horizontal {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 1rem;  /* 16px gap between icon and text */
+  padding: 1rem;  /* 16px padding */
+}
+
+/* List layout (compact) - Exact Figma specs */
+.ai-chat__action-card--list {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 0.75rem;  /* 12px gap between icon and content */
+  padding: 0.75rem;  /* 12px padding all around */
+  min-height: auto;
+  border: none;  /* No borders in list layout per Figma */
+  border-radius: 0.25rem;  /* 4px (sm) radius per Figma */
+  background: transparent;
+}
+
+/* Hover state - Exact Figma colors */
+.ai-chat__action-card--vertical:hover:not(:disabled),
+.ai-chat__action-card--horizontal:hover:not(:disabled) {
+  background: #fbfbfb;
+  border-color: #b0b6c0;
+}
+
+/* List layout hover - no border, subtle background per Figma */
+.ai-chat__action-card--list:hover:not(:disabled) {
+  border: none;
+  background: #fbfbfb;  /* Exact Figma hover color */
+}
+
+/* Dark mode list hover */
+[data-coreui-theme="dark"] .ai-chat__action-card--list:hover:not(:disabled) {
+  background: var(--ai-chat-hover);
+}
+
+/* List layout active/selected state */
+.ai-chat__action-card--list.ai-chat__action-card--selected,
+.ai-chat__action-card--list:active:not(:disabled) {
+  background: #f2f1ff;  /* Exact Figma active color */
+  border: none;
+}
+
+/* Dark mode list active */
+[data-coreui-theme="dark"] .ai-chat__action-card--list.ai-chat__action-card--selected,
+[data-coreui-theme="dark"] .ai-chat__action-card--list:active:not(:disabled) {
+  background: rgba(93, 75, 255, 0.15);
+}
+
+/* Active/pressed state - Exact Figma colors for vertical and horizontal */
+.ai-chat__action-card--vertical:active:not(:disabled),
+.ai-chat__action-card--horizontal:active:not(:disabled),
+.ai-chat__action-card--vertical.ai-chat__action-card--selected,
+.ai-chat__action-card--horizontal.ai-chat__action-card--selected {
+  background: #f2f1ff;
+  border-color: #9e93ff;
+}
+
+.ai-chat__action-card:active:not(:disabled) .ai-chat__action-card-icon i {
+  color: var(--ai-text-emphasis);  /* Darker purple on active */
+}
+
+/* Focus state */
+.ai-chat__action-card:focus-visible:not(:disabled) {
+  outline: 2px solid var(--ai-primary);
+  outline-offset: 2px;
+}
+
+/* Selected/Active state icon color changes to purple */
+.ai-chat__action-card--selected .ai-chat__action-card-icon i,
+.ai-chat__action-card:active:not(:disabled) .ai-chat__action-card-icon i {
+  color: #5D4BFF;  /* Purple icon in active state per Figma */
+}
+
+/* Disabled state - Figma spec with 0.35 opacity */
+.ai-chat__action-card:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.ai-chat__action-card-icon {
+  width: 1.5rem;  /* 24px from Figma */
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Icon alignment in horizontal layout - matches text baseline */
+.ai-chat__action-card--horizontal .ai-chat__action-card-icon {
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.125rem;  /* 2px offset to align with text */
+}
+
+/* List layout has smaller icon - exactly 20px per Figma */
+.ai-chat__action-card--list .ai-chat__action-card-icon {
+  width: 1.25rem;  /* 20px for list layout */
+  height: 1.25rem;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.125rem;  /* 2px top offset to align with text */
+  flex-shrink: 0;
+}
+
+.ai-chat__action-card--list .ai-chat__action-card-icon i {
+  font-size: 1.25rem;  /* 20px icon size */
+}
+
+.ai-chat__action-card-icon i {
+  font-size: 1.5rem;  /* 24px icon size */
+  color: var(--ai-chat-muted);  /* Gray color in default state - no purple */
+  transition: color 0.075s ease;
+}
+
+.ai-chat__action-card-content {
+  flex: 1 0 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;  /* 4px gap between title and description */
+}
+
+/* List layout has tighter spacing - 2px gap per Figma */
+.ai-chat__action-card--list .ai-chat__action-card-content {
+  gap: 0.125rem;  /* 2px gap between title and description */
+}
+
+.ai-chat__action-card-title {
+  font-size: 0.875rem;  /* 14px from Figma */
+  font-weight: 600;
+  color: #3c4b64;  /* Exact color from Figma */
+  margin: 0;
+  line-height: 1.43;  /* 20px/14px from Figma */
+  font-family: var(--ai-chat-font-family);
+}
+
+.ai-chat__action-card-desc {
+  font-size: 0.75rem;  /* 12px from Figma */
+  font-weight: 400;
+  color: #636f83;  /* Exact color from Figma */
+  margin: 0.25rem 0 0 0;  /* 4px gap from title */
+  line-height: 1.33;  /* 16px/12px from Figma */
+  display: -webkit-box;
+  -webkit-line-clamp: var(--card-desc-line-clamp);
+  line-clamp: var(--card-desc-line-clamp);
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: var(--ai-chat-font-family);
+}
+
+/* Dark mode action card text with balanced contrast */
+[data-coreui-theme="dark"] .ai-chat__action-card-title {
+  color: var(--cui-gray-100, #f8f9fa);  /* Softer white for balanced contrast */
+}
+
+[data-coreui-theme="dark"] .ai-chat__action-card-desc {
+  color: var(--cui-gray-400, #ced4da);  /* Balanced gray for readability */
+}
+
+/* Responsive layouts for action cards */
+/* Compact layout mode via data attribute */
+.ai-chat__initial-cards-wrapper[data-layout="compact"] {
+  --card-flex-direction: row;
+  --card-align-items: center;
+  --card-gap: var(--ai-chat-message-gap-horizontal, 0.75rem);
+  --card-padding: 0.75rem var(--ai-chat-padding, 1rem);
+  --card-icon-size: 1.25rem;
+  --card-desc-line-clamp: 2;
+}
+
+.ai-chat__initial-cards-wrapper[data-layout="compact"] .ai-chat__action-cards {
+  gap: 0.5rem;
+}
+
+/* Container query support for modern browsers - switch to list layout on small screens */
+@container cards-wrapper (max-width: 480px) {
+  .ai-chat__action-cards {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  /* Use list layout for cards in narrow containers */
+  .ai-chat__action-card {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.75rem;
+  }
+
+  .ai-chat__categories-search-input {
+    width: 150px;
+  }
+}
+
+/* Modal view - 3 cards per row */
+.ai-chat__panel--modal .ai-chat__initial-cards-wrapper {
+  --card-flex-direction: column;
+  --card-align-items: flex-start;
+  --card-gap: 0.5rem;
+  --card-padding: 1rem;
+  --card-icon-size: 1.25rem;
+  --card-desc-line-clamp: 2;
+}
+
+.ai-chat__panel--modal .ai-chat__action-cards {
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  max-width: 100%;
+}
+
+/* Responsive breakpoint for modal */
+@media (max-width: 768px) {
+  .ai-chat__panel--modal .ai-chat__action-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .ai-chat__panel--modal .ai-chat__action-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ai-chat__panel--modal .ai-chat__action-card--vertical {
+  min-height: 3rem;
+}
+
+/* NEW indicator - positioned in top right */
+.ai-chat__action-card-new {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  font-size: 0.625rem;  /* 10px */
+  font-weight: 500;
+  color: var(--ai-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  line-height: 1;
+}
+
+.ai-chat__badge--new {
+  background: var(--ai-primary);
+  color: white;
+}
+
+/* ========================================
+   CATEGORIES SECTION (DEPRECATED - Using history layout instead)
+   ======================================== */
+
+.ai-chat__categories-section {
+  width: 100%;
+  margin-top: 1.5rem;
+  background: var(--ai-chat-bg);
+  border: 1px solid var(--ai-chat-border-light);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.ai-chat__categories-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--ai-chat-border-light);
+  background: var(--ai-chat-hover);
+}
+
+.ai-chat__categories-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ai-chat-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ai-chat__categories-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.ai-chat__categories-search i {
+  position: absolute;
+  left: 0.75rem;
+  color: var(--ai-chat-muted);
+  font-size: 0.875rem;
+  pointer-events: none;
+}
+
+.ai-chat__categories-search-input {
+  padding: 0.375rem 0.75rem 0.375rem 2rem;
+  background: var(--ai-chat-bg);
+  border: 1px solid var(--ai-chat-border-light);
+  border-radius: 6px;
+  color: var(--ai-chat-color);
+  font-size: 0.8125rem;
+  font-family: inherit;
+  width: 180px;
+  transition: all 0.1s ease;
+}
+
+.ai-chat__categories-search-input:focus {
+  outline: none;
+  border-color: var(--ai-primary);
+  box-shadow: 0 0 0 2px rgba(93, 75, 255, 0.1);
+}
+
+.ai-chat__categories-search-input::placeholder {
+  color: var(--ai-chat-muted);
+}
+
+.ai-chat__categories-list {
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.ai-chat__category-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--ai-chat-border-light);
+  cursor: pointer;
+  transition: all 0.1s ease;
+  text-align: left;
+  font-family: inherit;
+}
+
+.ai-chat__category-item:last-child {
+  border-bottom: none;
+}
+
+.ai-chat__category-item:hover {
+  background: var(--ai-chat-hover);
+}
+
+.ai-chat__category-icon {
+  color: var(--ai-primary);
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.ai-chat__category-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.ai-chat__category-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ai-chat-color);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.ai-chat__category-badge {
+  background: var(--ai-primary);
+  color: white;
+  font-size: 0.625rem;
+  font-weight: 600;
+  padding: 0.125rem 0.375rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ai-chat__category-count {
+  color: var(--ai-chat-muted);
+  font-weight: 400;
+  font-size: 0.8125rem;
+}
+
+.ai-chat__category-desc {
+  font-size: 0.75rem;
+  color: var(--ai-chat-muted);
+  margin: 0;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2; /* Standard property */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ai-chat__category-arrow {
+  color: var(--ai-chat-muted);
+  font-size: 0.75rem;
+  flex-shrink: 0;
 }
 
 .file-upload__dropzone:hover {
@@ -442,7 +922,7 @@
   border: 3px solid var(--cui-gray-300, #dee2e6);
   border-top: 3px solid var(--cui-primary, #0d6efd);
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  animation: spin 0.5s linear infinite;
 }
 
 @keyframes spin {
@@ -475,7 +955,7 @@
 }
 
 body {
-    transition: margin-right 0.3s ease;
+    transition: margin-right 0.15s ease;
 }
 
 /* Body margin adjustment for panel layout */
@@ -628,7 +1108,7 @@ body.theme-switching *::after {
     --ai-chat-muted-light: var(--cui-gray-500, #adb5bd);
     --ai-chat-hover: var(--cui-gray-100, #f8f9fa);
     --ai-chat-message-user-bg: var(--cui-gray-100, #f8f9fa);
-    --ai-chat-avatar-assistant-bg: var(--cui-primary-bg-subtle, rgba(13, 110, 253, 0.15));
+    --ai-chat-avatar-assistant-bg: rgba(196, 190, 255, 0.3);  /* 30% opacity of #C4BEFF */
     --ai-chat-focus-border: var(--cui-purple, #6f42c1);
     --ai-chat-focus-shadow: 0 0 0 0.25rem rgba(111, 66, 193, 0.25);
     
@@ -644,7 +1124,7 @@ body.theme-switching *::after {
     
     /* Effects - Using CoreUI Design Tokens */
     --ai-chat-shadow: var(--cui-box-shadow-lg, 0 1rem 3rem rgba(0, 0, 0, 0.175));
-    --ai-chat-transition: var(--cui-transition-base, 0.15s ease-in-out);
+    --ai-chat-transition: var(--cui-transition-base, 0.075s ease-in-out);
     
     /* AI Color Palette - Approved Figma Colors */
     --ai-primary: #5D4BFF;          /* Primary AI purple */
@@ -663,19 +1143,58 @@ body.theme-switching *::after {
     /* Legacy support */
     --ai-chat-gradient-start: var(--ai-gradient-start);
     --ai-chat-gradient-end: var(--ai-gradient-end);
+
+    /* Overlay and modal */
+    --ai-chat-overlay-bg: rgba(0, 0, 0, 0.4);
+
+    /* Shared Interactive State Tokens - Consistent across all components */
+    --ai-interactive-border-default: #d8dbe0;  /* Default border for all interactive elements */
+    --ai-interactive-bg-hover: #fbfbfb;        /* Hover background */
+    --ai-interactive-border-hover: #b0b6c0;    /* Hover border */
+    --ai-interactive-bg-active: #f2f1ff;       /* Active/selected background */
+    --ai-interactive-border-active: #9e93ff;   /* Active/selected border */
+    --ai-interactive-opacity-disabled: 0.35;    /* Disabled state opacity */
+
+    /* Component-specific tokens that use shared tokens */
+    --ai-chat-card-border: var(--ai-interactive-border-default);
+    --ai-chat-card-bg-hover: var(--ai-interactive-bg-hover);
+    --ai-chat-card-border-hover: var(--ai-interactive-border-hover);
+    --ai-chat-card-bg-active: var(--ai-interactive-bg-active);
+    --ai-chat-card-border-active: var(--ai-interactive-border-active);
+
+    /* Legacy support - keeping for backward compatibility */
+    --ai-chat-card-active-bg: var(--ai-interactive-bg-active);
+    --ai-chat-card-active-border: var(--ai-interactive-border-active);
+
+    /* Minimalist design variables - removed unnecessary effects */
 }
 
-/* Dark mode support - Using CoreUI Dark Theme Tokens */
+/* Dark mode support - Using CoreUI Dark Theme Tokens with balanced contrast */
 [data-coreui-theme="dark"] .ai-chat {
+    /* Background and base colors - balanced for readability */
     --ai-chat-bg: var(--cui-gray-900, #212529);
-    --ai-chat-color: var(--cui-gray-100, #f8f9fa);
-    --ai-chat-border: var(--cui-gray-700, #495057);
-    --ai-chat-border-light: var(--cui-gray-700, #495057);
-    --ai-chat-muted: var(--cui-gray-400, #ced4da);
+    --ai-chat-color: var(--cui-gray-100, #f8f9fa);  /* Softer white for reduced eye strain */
+    --ai-chat-border: rgba(255, 255, 255, 0.075);  /* Subtle border following CoreUI */
+    --ai-chat-border-light: rgba(255, 255, 255, 0.05);  /* Very subtle */
+    --ai-chat-muted: var(--cui-gray-400, #ced4da);  /* Balanced muted text */
     --ai-chat-muted-light: var(--cui-gray-500, #adb5bd);
     --ai-chat-hover: var(--cui-gray-800, #343a40);
-    --ai-chat-message-user-bg: var(--cui-gray-800, #343a40);
-    --ai-chat-avatar-assistant-bg: var(--cui-purple-bg-subtle, rgba(111, 66, 193, 0.2));
+    --ai-chat-message-user-bg: var(--cui-gray-800, #343a40);  /* Balanced message bg */
+    --ai-chat-avatar-assistant-bg: rgba(93, 75, 255, 0.3);
+
+    /* Overlay and modal - dark mode */
+    --ai-chat-overlay-bg: rgba(0, 0, 0, 0.6);
+
+    /* Dark mode interactive state tokens - balanced borders */
+    --ai-interactive-border-default: rgba(255, 255, 255, 0.08);  /* Subtle default border */
+    --ai-interactive-bg-hover: rgba(255, 255, 255, 0.04);  /* Subtle hover bg */
+    --ai-interactive-border-hover: rgba(255, 255, 255, 0.12);  /* Slightly visible hover */
+    --ai-interactive-bg-active: rgba(93, 75, 255, 0.15);  /* Purple active */
+    --ai-interactive-border-active: rgba(93, 75, 255, 0.3);  /* Purple border */
+
+    /* Action card states - dark mode (using shared tokens) */
+    --ai-chat-card-active-bg: var(--ai-interactive-bg-active);
+    --ai-chat-card-active-border: var(--ai-interactive-border-active);
 }
 
 /* ========================================
@@ -690,7 +1209,7 @@ body.theme-switching *::after {
     font-size: var(--ai-chat-font-size);
     line-height: var(--ai-chat-line-height);
     position: fixed;
-    transition: all 0.3s ease;
+    transition: all 0.15s ease;
 }
 
 /* Panel Layout (Default) */
@@ -739,7 +1258,7 @@ body.theme-switching *::after {
     top: 0;
     bottom: 0;
     width: 2px;
-    background: var(--ai-chat-focus-border);
+    background: var(--ai-primary);  /* Use main purple color */
 }
 
 .ai-chat--minimized .ai-chat__resize-handle {
@@ -760,13 +1279,13 @@ body.theme-switching *::after {
     flex-shrink: 0;
 }
 
-/* Header in initial state without history */
-.ai-chat--initial-state:not(.ai-chat--history-active) .ai-chat__header {
+/* Header in initial state without history or show-all */
+.ai-chat--initial-state:not(.ai-chat--history-active):not(.ai-chat--show-all-active) .ai-chat__header {
     border-bottom: none;
     justify-content: flex-end;
 }
 
-.ai-chat--initial-state:not(.ai-chat--history-active) .ai-chat__header-left {
+.ai-chat--initial-state:not(.ai-chat--history-active):not(.ai-chat--show-all-active) .ai-chat__header-left {
     display: none;
 }
 
@@ -797,15 +1316,18 @@ body.theme-switching *::after {
     color: var(--ai-chat-color);
 }
 
-/* Show back button only in history view */
-.ai-chat--history-active .ai-chat__back {
+/* Show back button only in history and show-all views */
+.ai-chat--history-active .ai-chat__back,
+.ai-chat--show-all-active .ai-chat__back {
     display: inline-flex;
 }
 
-.ai-chat--history-active .ai-chat__new-chat-btn {
+.ai-chat--history-active .ai-chat__new-chat-btn,
+.ai-chat--show-all-active .ai-chat__new-chat-btn {
     display: none;
 }
 
+/* Hide history button only when history panel is active, keep visible for show-all */
 .ai-chat--history-active .ai-chat__action[data-action="history"] {
     display: none;
 }
@@ -880,7 +1402,7 @@ body.theme-switching *::after {
     gap: 48px;
 }
 
-.ai-chat--initial-state:not(.ai-chat--history-active) .ai-chat__initial {
+.ai-chat--initial-state:not(.ai-chat--history-active):not(.ai-chat--show-all-active) .ai-chat__initial {
     display: flex;
 }
 
@@ -931,6 +1453,29 @@ body.theme-switching *::after {
 
 .ai-chat__title .assist-text {
     color: var(--ai-chat-color);
+}
+
+/* Session header in chat area - minimalist */
+.ai-chat__session-header {
+    padding: 0.25rem 0.5rem;
+    text-align: center;
+    margin-bottom: 0.75rem;
+}
+
+/* Session ID styling - minimalist, small, regular font */
+.ai-chat__session-id {
+    font-size: 0.6875rem;  /* 11px - very small text */
+    color: var(--ai-chat-muted);
+    font-weight: 400;
+    opacity: 0.6;
+    font-family: inherit;  /* Use regular font, not monospace */
+}
+
+.ai-chat__initial-cards-wrapper .ai-chat__tool-pill {
+  align-self: center;
+  margin-top: 0.5rem;
+  font-weight: 400;
+  color: var(--ai-chat-muted);
 }
 
 .ai-chat__initial-input-wrapper {
@@ -1031,47 +1576,52 @@ body.theme-switching *::after {
     display: none;
 }
 
+/* Show All Active State */
+.ai-chat--show-all-active .ai-chat__tools-list {
+    display: flex;
+}
+
+.ai-chat--show-all-active .ai-chat__history {
+    display: none;
+}
+
+.ai-chat--show-all-active .ai-chat__tools-list {
+    display: flex !important;
+}
+
+.ai-chat--show-all-active .ai-chat__initial,
+.ai-chat--show-all-active .ai-chat__messages,
+.ai-chat--show-all-active .ai-chat__footer {
+    display: none;
+}
+
 .ai-chat__history-content {
     flex: 1;
     overflow-y: auto;
-    padding: 24px;
+    padding: 0; /* Remove padding to eliminate extra margins */
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    height: 100%;
 }
 
-.ai-chat__history-header {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem; /* CoreUI spacing equivalent */
-    margin-bottom: 0.25rem; /* CoreUI spacing equivalent */
+
+/* Sticky search wrapper with glassmorphism effect */
+.ai-chat__history-search-sticky {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 1rem;
+    margin: 0; /* Remove negative margins since content has no padding */
 }
 
-.ai-chat__history-logo {
-    width: 32px;
-    height: 32px;
-    background: linear-gradient(135deg, var(--ai-gradient-start), var(--ai-gradient-end));
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.ai-chat__history-logo i {
-    font-size: 18px;
-    color: white;
-    line-height: 1;
-}
-
-.ai-chat__history-title {
-    font-size: 18px;
-    font-weight: 600;
-    color: var(--ai-chat-color);
-    line-height: 1;
-    margin: 0;
-    display: flex;
-    align-items: center;
+/* Dark mode sticky search - improved glassmorphism */
+[data-coreui-theme="dark"] .ai-chat__history-search-sticky {
+    background: rgba(33, 37, 41, 0.85);  /* Using CoreUI gray-900 with higher opacity */
+    border-bottom: 1px solid rgba(108, 117, 125, 0.3);  /* Using CoreUI gray-600 */
 }
 
 .ai-chat__history-search {
@@ -1081,7 +1631,7 @@ body.theme-switching *::after {
 .ai-chat__history-search-input {
     width: 100%;
     height: 40px;
-    padding: 10px 40px 10px 12px;
+    padding: 10px 12px 10px 40px;  /* Icon now on left, so left padding increased */
     background: var(--ai-chat-bg);
     color: var(--ai-chat-color);
     border: var(--ai-chat-border-width) solid var(--ai-chat-border);
@@ -1103,7 +1653,7 @@ body.theme-switching *::after {
 
 .ai-chat__history-search-icon {
     position: absolute;
-    right: 12px;
+    left: 12px;  /* Moved to left side */
     top: 50%;
     transform: translateY(-50%);
     color: var(--ai-chat-muted);
@@ -1114,19 +1664,46 @@ body.theme-switching *::after {
     display: flex;
     flex-direction: column;
     gap: 2px;
+    padding: 0 1rem 1rem 1rem; /* Add padding for content spacing */
+}
+
+.ai-chat__category-section {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 1rem;
+}
+
+.ai-chat__category-section:last-child {
+    margin-bottom: 0;
+}
+
+.ai-chat__category-header {
+    font-size: 0.75rem; /* 12px */
+    font-weight: 600;
+    color: var(--ai-chat-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+    padding: 0 0.75rem;
+}
+
+/* Dark mode category headers with balanced contrast */
+[data-coreui-theme="dark"] .ai-chat__category-header {
+    color: var(--cui-gray-500, #adb5bd);  /* Balanced for readability */
 }
 
 .ai-chat__history-item {
-    padding: 10px 12px;
+    padding: 0.75rem;  /* 12px padding to match list items */
     background: transparent;
     border: none;
-    border-radius: var(--ai-chat-border-radius-sm);
+    border-radius: 0.25rem;  /* 4px radius */
     color: var(--ai-chat-color);
     font-family: inherit;
     font-size: var(--ai-chat-font-size);
     text-align: left;
     cursor: pointer;
-    transition: all var(--ai-chat-transition);
+    transition: background-color 0.075s ease;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -1134,14 +1711,77 @@ body.theme-switching *::after {
 }
 
 .ai-chat__history-item:hover {
-    background: var(--ai-chat-hover);
+    background: var(--ai-interactive-bg-hover);
 }
 
+/* Pressed/Active state - purple background */
+.ai-chat__history-item:active {
+    background: var(--ai-interactive-bg-active);
+}
+
+/* Selected state - purple background AND bold purple text for title */
 .ai-chat__history-item--active {
-    background: var(--ai-chat-hover);
-    color: var(--ai-primary);
+    background: var(--ai-interactive-bg-active) !important;  /* Ensure it overrides hover */
 }
 
+.ai-chat__history-item--active .ai-chat__history-item-title {
+    font-weight: 600 !important;  /* Bold */
+    color: var(--ai-primary) !important;  /* Purple text */
+}
+
+/* Dark mode history hover */
+[data-coreui-theme="dark"] .ai-chat__history-item:hover {
+    background: var(--ai-interactive-bg-hover);
+}
+
+/* Dark mode pressed state */
+[data-coreui-theme="dark"] .ai-chat__history-item:active {
+    background: var(--ai-interactive-bg-active);
+}
+
+/* Dark mode selected state - purple background */
+[data-coreui-theme="dark"] .ai-chat__history-item--active {
+    background: var(--ai-interactive-bg-active) !important;  /* Purple tinted background */
+}
+
+[data-coreui-theme="dark"] .ai-chat__history-item--active .ai-chat__history-item-title {
+    font-weight: 600 !important;
+    color: var(--ai-primary-alt) !important;  /* Lighter purple in dark mode */
+}
+
+/* History item content structure */
+.ai-chat__history-item-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 8px;
+}
+
+.ai-chat__history-item-title {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 400;  /* Regular weight, not bold */
+    color: var(--ai-chat-color);
+    font-size: var(--ai-chat-font-size);  /* 14px */
+}
+
+.ai-chat__history-item-date {
+    font-size: var(--cui-font-size-xs, 0.75rem);  /* 12px */
+    color: var(--ai-chat-muted);
+    flex-shrink: 0;
+    font-weight: 400;
+}
+
+/* Keep date muted even when selected */
+.ai-chat__history-item--active .ai-chat__history-item-date {
+    color: var(--ai-chat-muted);
+    font-weight: 400;  /* Not bold */
+}
+
+/* Legacy support for old structure */
 .ai-chat__history-item-text {
     flex: 1;
     overflow: hidden;
@@ -1175,7 +1815,7 @@ body.theme-switching *::after {
     gap: var(--ai-chat-message-gap-horizontal);
     margin-bottom: var(--ai-chat-message-gap-vertical);
     align-items: flex-start;
-    animation: messageIn 0.3s ease;
+    animation: messageIn 0.15s ease;
 }
 
 @keyframes messageIn {
@@ -1210,7 +1850,7 @@ body.theme-switching *::after {
 
 .ai-chat__avatar--assistant {
     background: var(--ai-chat-avatar-assistant-bg);
-    color: var(--ai-primary);
+    color: var(--ai-primary);  /* #5D4BFF - our primary purple */
 }
 
 .ai-chat__bubble {
@@ -1246,15 +1886,15 @@ body.theme-switching *::after {
     height: 6px;
     background: var(--ai-chat-muted);
     border-radius: 50%;
-    animation: typing 1.4s infinite;
+    animation: typing 0.7s infinite;
 }
 
 .ai-chat__typing-dot:nth-child(2) {
-    animation-delay: 0.2s;
+    animation-delay: 0.1s;
 }
 
 .ai-chat__typing-dot:nth-child(3) {
-    animation-delay: 0.4s;
+    animation-delay: 0.2s;
 }
 
 @keyframes typing {
@@ -1282,7 +1922,7 @@ body.theme-switching *::after {
     display: flex;
     gap: 0.75rem; /* CoreUI spacing equivalent */
     align-items: center; /* Default center alignment for single line */
-    transition: align-items var(--cui-transition-base, 0.15s ease-in-out);
+    transition: align-items var(--cui-transition-base, 0.075s ease-in-out);
 }
 
 /* When input becomes multiline, align button to bottom */

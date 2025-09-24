@@ -1,63 +1,88 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { ActionCard } from '../common/ActionCard';
 
 interface ChatInitialProps {
   onSendMessage: (message: string) => void;
   onFlowTrigger?: (flowMessage: string) => void;
   isTyping: boolean;
+  onShowAllToggle?: () => void;
 }
 
-export const ChatInitial: React.FC<ChatInitialProps> = ({ onSendMessage, onFlowTrigger, isTyping }) => {
-  const [inputValue, setInputValue] = useState('');
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+export const ChatInitial: React.FC<ChatInitialProps> = ({ onSendMessage, onFlowTrigger, isTyping, onShowAllToggle }) => {
+  const [isCompact, setIsCompact] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInputValue(e.target.value);
-    handleTextareaResize(e.target);
-  };
-
-  const handleTextareaResize = (textarea: HTMLTextAreaElement) => {
-    // Reset height to get accurate scrollHeight
-    textarea.style.height = 'auto';
-    
-    // Calculate new height
-    const maxHeight = 120;
-    const newHeight = Math.min(textarea.scrollHeight, maxHeight);
-    
-    // Apply new height
-    textarea.style.height = `${newHeight}px`;
-    
-    // Handle overflow
-    textarea.style.overflowY = textarea.scrollHeight > maxHeight ? 'auto' : 'hidden';
-  };
-
-  const handleSend = () => {
-    const message = inputValue.trim();
-    if (!message || isTyping) return;
-
-    onSendMessage(message);
-    setInputValue('');
-    
-    // Reset textarea height
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
+  // Action cards data
+  const actionCards = [
+    {
+      id: 'create-single-client',
+      icon: 'cil-user-plus',
+      title: 'Create Single Client',
+      description: 'Set up a new client with automated configuration including delivery methods and credentials.',
+      isNew: true,
+      action: () => onFlowTrigger ? onFlowTrigger('Create Single Client') : onSendMessage('Create Single Client')
+    },
+    {
+      id: 'create-multiple-clients',
+      icon: 'cil-people',
+      title: 'Create Multiple Clients',
+      description: 'Import and set up multiple clients at once from CSV or Excel files.',
+      disabled: true
+    },
+    {
+      id: 'clients-insights',
+      icon: 'cil-chart-pie',
+      title: 'Clients Insights',
+      description: 'View analytics, performance metrics, and lead distribution across all clients.',
+      disabled: true
+    },
+    {
+      id: 'flow-4',
+      icon: 'cil-bolt',
+      title: 'Another Flow',
+      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.',
+      disabled: true
+    },
+    {
+      id: 'flow-5',
+      icon: 'cil-bolt',
+      title: 'Another Flow',
+      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.',
+      disabled: true
+    },
+    {
+      id: 'flow-6',
+      icon: 'cil-bolt',
+      title: 'Another Flow',
+      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.',
+      disabled: true
     }
-  };
+  ];
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  };
+  const visibleCards = actionCards.slice(0, 3);
 
+  // Detect container width for responsive layout
   useEffect(() => {
-    // Focus the input when component mounts
-    if (textareaRef.current) {
-      textareaRef.current.focus();
-    }
-  }, []);
+    const checkWidth = () => {
+      if (wrapperRef.current) {
+        const width = wrapperRef.current.offsetWidth;
+        setIsCompact(width <= 640);
+      }
+    };
 
-  const isDisabled = !inputValue.trim() || isTyping;
+    // Check on mount and resize
+    checkWidth();
+
+    // Use ResizeObserver for container size changes
+    const resizeObserver = new ResizeObserver(checkWidth);
+    if (wrapperRef.current) {
+      resizeObserver.observe(wrapperRef.current);
+    }
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
 
   return (
     <div className="ai-chat__initial">
@@ -70,53 +95,36 @@ export const ChatInitial: React.FC<ChatInitialProps> = ({ onSendMessage, onFlowT
           <span className="assist-text" aria-label="AI Assist">Assist</span>
         </h1>
       </div>
-      
-      <div className="ai-chat__initial-input-wrapper">
-        <div className="ai-chat__initial-input-group">
-          <textarea
-            ref={textareaRef}
-            className="ai-chat__initial-input"
-            placeholder="Ask me anything..."
-            aria-label="Chat input"
-            aria-describedby="chat-input-hint"
-            rows={1}
-            value={inputValue}
-            onChange={handleInputChange}
-            onKeyDown={handleKeyDown}
-          />
-          <span id="chat-input-hint" className="sr-only">Press Enter to send, Shift+Enter for new line</span>
-          <button
-            className="ai-chat__initial-send"
-            type="button"
-            disabled={isDisabled}
-            onClick={handleSend}
-            aria-label="Send message"
-          >
-            <i className="cil-send" aria-hidden="true"></i>
-          </button>
+
+      <div
+        ref={wrapperRef}
+        className="ai-chat__initial-cards-wrapper"
+        data-layout={isCompact ? 'compact' : 'default'}
+      >
+        <div className="ai-chat__action-cards ai-chat__action-cards--collapsed">
+          {visibleCards.map(card => (
+            <ActionCard
+              key={card.id}
+              icon={card.icon}
+              title={card.title}
+              description={card.description}
+              isNew={card.isNew}
+              disabled={card.disabled || isTyping}
+              onClick={card.action}
+              aria-label={card.title}
+            />
+          ))}
         </div>
-        
-        <div className="ai-chat__tools-pills">
+
+        {actionCards.length > 3 && (
           <button
             className="ai-chat__tool-pill"
-            onClick={() => onFlowTrigger ? onFlowTrigger('Create new client') : onSendMessage('Create new client')}
-            disabled={isTyping}
-            aria-label="Create new client"
+            onClick={onShowAllToggle}
+            aria-label="Show all actions"
           >
-            <i className="cil-user-plus" aria-hidden="true"></i>
-            <span>Create Client</span>
+            Show All
           </button>
-          
-          <button className="ai-chat__tool-pill ai-chat__tool-pill--disabled" disabled aria-label="Bulk create clients (coming soon)">
-            <i className="cil-people" aria-hidden="true"></i>
-            <span>Bulk Create Clients</span>
-          </button>
-          
-          <button className="ai-chat__tool-pill ai-chat__tool-pill--disabled" disabled aria-label="Client insights (coming soon)">
-            <i className="cil-chart-pie" aria-hidden="true"></i>
-            <span>Client Insights</span>
-          </button>
-        </div>
+        )}
       </div>
     </div>
   );

@@ -10,6 +10,8 @@ import { ChatInitial } from './ChatInitial';
 import { ChatMessages } from './ChatMessages';
 import { ChatInput } from './ChatInput';
 import { ChatHistory } from './ChatHistory';
+import { SearchableList, type SearchableListItem } from '../common/SearchableList';
+import { ActionCard } from '../common/ActionCard';
 
 interface ResizeState {
   isResizing: boolean;
@@ -42,6 +44,91 @@ export const Chat: React.FC<ChatProps> = ({ className = '' }) => {
     loadConversations,
     config
   } = useChatState();
+
+  // Tool items for the Show All panel
+  interface ToolItem extends SearchableListItem {
+    icon: string;
+    title: string;
+    description: string;
+    category: string;
+    isNew?: boolean;
+    disabled?: boolean;
+  }
+
+  const toolItems: ToolItem[] = [
+    {
+      id: 'create-single-client',
+      icon: 'cil-user-plus',
+      title: 'Create Single Client',
+      description: 'Set up a new client with automated configuration including delivery methods and credentials.',
+      isNew: true,
+      category: 'Category A'
+    },
+    {
+      id: 'create-multiple-clients',
+      icon: 'cil-people',
+      title: 'Create Multiple Clients',
+      description: 'Import and set up multiple clients at once from CSV or Excel files.',
+      disabled: true,
+      category: 'Category A'
+    },
+    {
+      id: 'clients-insights',
+      icon: 'cil-chart-pie',
+      title: 'Clients Insights',
+      description: 'View analytics, performance metrics, and lead distribution across all clients.',
+      disabled: true,
+      category: 'Category A'
+    },
+    {
+      id: 'another-flow-2',
+      icon: 'cil-bolt',
+      title: 'Another Flow',
+      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.',
+      disabled: true,
+      category: 'Category A'
+    },
+    {
+      id: 'another-flow-3',
+      icon: 'cil-bolt',
+      title: 'Another Flow',
+      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.',
+      disabled: true,
+      category: 'Category A'
+    },
+    {
+      id: 'another-flow-4',
+      icon: 'cil-bolt',
+      title: 'Another Flow',
+      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.',
+      disabled: true,
+      category: 'Category A'
+    },
+    {
+      id: 'another-flow-5',
+      icon: 'cil-bolt',
+      title: 'Another Flow',
+      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.',
+      disabled: true,
+      category: 'Category B'
+    },
+    {
+      id: 'another-flow-6',
+      icon: 'cil-bolt',
+      title: 'Another Flow',
+      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.',
+      disabled: true,
+      category: 'Category B'
+    },
+    {
+      id: 'another-flow-7',
+      icon: 'cil-bolt',
+      title: 'Another Flow',
+      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.',
+      disabled: true,
+      category: 'Category B'
+    }
+  ];
 
   const [openaiService] = useState(() => {
     console.log('🔧 Initializing OpenAI Service with content:', {
@@ -523,11 +610,17 @@ export const Chat: React.FC<ChatProps> = ({ className = '' }) => {
   };
 
   const handleHistoryToggle = () => {
-    updateState({ isHistoryActive: !state.isHistoryActive });
+    updateState({
+      isHistoryActive: !state.isHistoryActive,
+      isShowAllActive: false  // Close show all panel when toggling history
+    });
   };
 
   const handleBackClick = () => {
-    updateState({ isHistoryActive: false });
+    updateState({
+      isHistoryActive: false,
+      isShowAllActive: false
+    });
   };
 
   const handleNewChat = () => {
@@ -560,8 +653,9 @@ export const Chat: React.FC<ChatProps> = ({ className = '' }) => {
 
   const handleConversationSelect = (conversationId: string) => {
     loadConversation(conversationId);
-    updateState({ 
+    updateState({
       isHistoryActive: false,
+      isShowAllActive: false,  // Close show all panel when selecting conversation
       isInitialState: false
     });
   };
@@ -572,6 +666,7 @@ export const Chat: React.FC<ChatProps> = ({ className = '' }) => {
     if (state.isMinimized) classes += ' ai-chat--minimized';
     if (state.isMaximized) classes += ' ai-chat--maximized';
     if (state.isHistoryActive) classes += ' ai-chat--history-active';
+    if (state.isShowAllActive) classes += ' ai-chat--show-all-active';
     if (className) classes += ` ${className}`;
     return classes;
   };
@@ -600,27 +695,67 @@ export const Chat: React.FC<ChatProps> = ({ className = '' }) => {
         />
       )}
 
+      {/* Show All Panel */}
+      {state.isShowAllActive && (
+        <SearchableList
+          items={toolItems}
+          title="All Tools"
+          icon="cil-apps"
+          searchPlaceholder="Search tools..."
+          emptyMessage="No matching tools found"
+          onItemClick={(item) => {
+            if (!item.disabled) {
+              handleSendMessage(item.title);
+              updateState({ isShowAllActive: false });
+            }
+          }}
+          searchFilter={(item, query) => {
+            const q = query.toLowerCase();
+            return item.title.toLowerCase().includes(q) ||
+                   item.description.toLowerCase().includes(q);
+          }}
+          itemTemplate={(item, onClick) => (
+            <ActionCard
+              key={item.id}
+              icon={item.icon}
+              title={item.title}
+              description={item.description}
+              layout="list"
+              isNew={item.isNew}
+              disabled={item.disabled || state.isTyping}
+              onClick={onClick}
+            />
+          )}
+          className="ai-chat__tools-list"
+        />
+      )}
+
       {/* Initial State */}
-      {state.isInitialState && !state.isHistoryActive && (
+      {state.isInitialState && !state.isHistoryActive && !state.isShowAllActive && (
         <ChatInitial
           onSendMessage={handleSendMessage}
           onFlowTrigger={handleFlowTrigger}
           isTyping={state.isTyping}
+          onShowAllToggle={() => updateState({
+            isShowAllActive: true,
+            isHistoryActive: false  // Close history panel when showing all tools
+          })}
         />
       )}
 
       {/* Messages */}
-      {!state.isInitialState && !state.isHistoryActive && state.currentConversation && (
+      {!state.isInitialState && !state.isHistoryActive && !state.isShowAllActive && state.currentConversation && (
         <ChatMessages
           messages={state.currentConversation.messages}
           isTyping={state.isTyping}
+          conversationId={state.currentConversation.id}
           onSuggestedActionClick={handleSuggestedActionClick}
           onFileUpload={handleFileUpload}
         />
       )}
 
       {/* Input */}
-      {!state.isInitialState && !state.isHistoryActive && (
+      {!state.isInitialState && !state.isHistoryActive && !state.isShowAllActive && (
         <ChatInput
           onSendMessage={handleSendMessage}
           isTyping={state.isTyping}
