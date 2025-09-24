@@ -61,11 +61,14 @@ export const ChatInitial: React.FC<ChatInitialProps> = ({ onSendMessage, onFlowT
 
   return (
     <div className="ai-chat__initial">
-      <div className="ai-chat__logo-section">
-        <div className="ai-chat__logo">
-          <i className="cil-star"></i>
+      <div className="ai-chat__logo-section" role="banner">
+        <div className="ai-chat__logo" aria-hidden="true">
+          <img src="/src/assets/ai-assist-logo.svg" alt="" />
         </div>
-        <h1 className="ai-chat__title">LeadExec Copilot</h1>
+        <h1 className="ai-chat__title">
+          <span className="ai-text">AI</span>
+          <span className="assist-text" aria-label="AI Assist">Assist</span>
+        </h1>
       </div>
       
       <div className="ai-chat__initial-input-wrapper">
@@ -74,39 +77,44 @@ export const ChatInitial: React.FC<ChatInitialProps> = ({ onSendMessage, onFlowT
             ref={textareaRef}
             className="ai-chat__initial-input"
             placeholder="Ask me anything..."
+            aria-label="Chat input"
+            aria-describedby="chat-input-hint"
             rows={1}
             value={inputValue}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
           />
+          <span id="chat-input-hint" className="sr-only">Press Enter to send, Shift+Enter for new line</span>
           <button
             className="ai-chat__initial-send"
             type="button"
             disabled={isDisabled}
             onClick={handleSend}
+            aria-label="Send message"
           >
-            <i className="cil-send"></i>
+            <i className="cil-send" aria-hidden="true"></i>
           </button>
         </div>
         
         <div className="ai-chat__tools-pills">
-          <button 
-            className="ai-chat__tool-pill" 
+          <button
+            className="ai-chat__tool-pill"
             onClick={() => onFlowTrigger ? onFlowTrigger('Create new client') : onSendMessage('Create new client')}
             disabled={isTyping}
+            aria-label="Create new client"
           >
-            <i className="cil-user-plus"></i>
-            Create Client
+            <i className="cil-user-plus" aria-hidden="true"></i>
+            <span>Create Client</span>
           </button>
           
-          <button className="ai-chat__tool-pill ai-chat__tool-pill--disabled" disabled>
-            <i className="cil-people"></i>
-            Bulk Create Clients
+          <button className="ai-chat__tool-pill ai-chat__tool-pill--disabled" disabled aria-label="Bulk create clients (coming soon)">
+            <i className="cil-people" aria-hidden="true"></i>
+            <span>Bulk Create Clients</span>
           </button>
           
-          <button className="ai-chat__tool-pill ai-chat__tool-pill--disabled" disabled>
-            <i className="cil-chart-pie"></i>
-            Client Insights
+          <button className="ai-chat__tool-pill ai-chat__tool-pill--disabled" disabled aria-label="Client insights (coming soon)">
+            <i className="cil-chart-pie" aria-hidden="true"></i>
+            <span>Client Insights</span>
           </button>
         </div>
       </div>

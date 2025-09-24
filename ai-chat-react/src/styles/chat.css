@@ -1,4 +1,47 @@
 /* ========================================
+   ACCESSIBILITY UTILITIES
+   ======================================== */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Focus visible for keyboard navigation */
+*:focus-visible {
+    outline: 2px solid var(--ai-primary);
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .ai-chat__title .ai-text {
+        background: none;
+        -webkit-text-fill-color: var(--ai-text-emphasis);
+        color: var(--ai-text-emphasis);
+    }
+
+    .ai-chat__logo {
+        border: 2px solid var(--ai-primary);
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ========================================
    MARKDOWN CONTENT STYLING
    ======================================== */
 .markdown-content {
@@ -603,9 +646,23 @@ body.theme-switching *::after {
     --ai-chat-shadow: var(--cui-box-shadow-lg, 0 1rem 3rem rgba(0, 0, 0, 0.175));
     --ai-chat-transition: var(--cui-transition-base, 0.15s ease-in-out);
     
-    /* Accent - Using CoreUI Design Tokens */
-    --ai-chat-gradient-start: var(--cui-primary, #321fdb);
-    --ai-chat-gradient-end: var(--cui-purple, #6f42c1);
+    /* AI Color Palette - Approved Figma Colors */
+    --ai-primary: #5D4BFF;          /* Primary AI purple */
+    --ai-primary-alt: #7565FF;      /* Secondary AI purple */
+    --ai-text-emphasis: #321FDB;    /* Darkest purple for emphasis */
+    --ai-border-subtle: #A49AFF;    /* Light purple for borders */
+    --ai-bg-subtle: #C4BEFF;        /* Subtle background */
+    --ai-bg-subtle-alpha: rgba(196, 190, 255, 0.3); /* Very subtle background */
+
+    /* Contextual AI Variables */
+    --ai-gradient-start: var(--ai-primary-alt);
+    --ai-gradient-end: var(--ai-primary);
+    --ai-shadow-color: rgba(93, 75, 255, 0.25);
+    --ai-hover-shadow: rgba(93, 75, 255, 0.3);
+
+    /* Legacy support */
+    --ai-chat-gradient-start: var(--ai-gradient-start);
+    --ai-chat-gradient-end: var(--ai-gradient-end);
 }
 
 /* Dark mode support - Using CoreUI Dark Theme Tokens */
@@ -758,7 +815,7 @@ body.theme-switching *::after {
     align-items: center;
     gap: 6px;
     padding: 6px 12px;
-    background: linear-gradient(135deg, var(--ai-chat-gradient-start), var(--ai-chat-gradient-end));
+    background: linear-gradient(135deg, var(--ai-gradient-start), var(--ai-gradient-end));
     color: white;
     border: none;
     border-radius: var(--ai-chat-border-radius-sm);
@@ -801,7 +858,7 @@ body.theme-switching *::after {
 
 .ai-chat__action--active {
     background: var(--ai-chat-hover);
-    color: var(--ai-chat-gradient-start);
+    color: var(--ai-primary);
 }
 
 /* ========================================
@@ -831,33 +888,49 @@ body.theme-switching *::after {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 16px;
+    gap: 24px;
+    margin-bottom: 48px;
 }
 
 .ai-chat__logo {
-    width: 72px;
-    height: 72px;
-    background: linear-gradient(135deg, var(--ai-chat-gradient-start), var(--ai-chat-gradient-end));
-    border-radius: 50%;
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, var(--ai-gradient-start), var(--ai-gradient-end));
+    border-radius: 16px;
+    padding: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 8px 24px rgba(70, 45, 216, 0.2);
+    box-shadow: 0px 21px 19.1px -7px var(--ai-shadow-color);
 }
 
-.ai-chat__logo i {
-    font-size: 36px;
-    color: white;
-    line-height: 1;
+.ai-chat__logo img {
+    width: 44px;
+    height: 44px;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
 }
 
 .ai-chat__title {
-    font-size: 20px;
+    font-size: 24px;
     font-weight: 600;
-    color: var(--ai-chat-color);
     line-height: 1;
     margin: 0;
     text-align: center;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.ai-chat__title .ai-text {
+    background: linear-gradient(132deg, var(--ai-gradient-start) 10.69%, var(--ai-gradient-end) 102.89%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.ai-chat__title .assist-text {
+    color: var(--ai-chat-color);
 }
 
 .ai-chat__initial-input-wrapper {
@@ -909,7 +982,7 @@ body.theme-switching *::after {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, var(--ai-chat-gradient-start), var(--ai-chat-gradient-end));
+    background: linear-gradient(135deg, var(--ai-gradient-start), var(--ai-gradient-end));
     color: white;
     border: none;
     border-radius: 50%;
@@ -919,7 +992,18 @@ body.theme-switching *::after {
 
 .ai-chat__initial-send:hover:not(:disabled) {
     transform: translateY(-50%) scale(1.1);
-    box-shadow: 0 4px 12px rgba(70, 45, 216, 0.3);
+    box-shadow: 0 4px 12px var(--ai-hover-shadow);
+}
+
+.ai-chat__initial-send:focus-visible {
+    outline: 2px solid var(--ai-primary);
+    outline-offset: 2px;
+}
+
+.ai-chat__initial-send:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: linear-gradient(135deg, var(--ai-border-subtle), var(--ai-bg-subtle));
 }
 
 .ai-chat__initial-send:disabled {
@@ -966,7 +1050,7 @@ body.theme-switching *::after {
 .ai-chat__history-logo {
     width: 32px;
     height: 32px;
-    background: linear-gradient(135deg, var(--ai-chat-gradient-start), var(--ai-chat-gradient-end));
+    background: linear-gradient(135deg, var(--ai-gradient-start), var(--ai-gradient-end));
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -1055,7 +1139,7 @@ body.theme-switching *::after {
 
 .ai-chat__history-item--active {
     background: var(--ai-chat-hover);
-    color: var(--ai-chat-gradient-start);
+    color: var(--ai-primary);
 }
 
 .ai-chat__history-item-text {
@@ -1126,7 +1210,7 @@ body.theme-switching *::after {
 
 .ai-chat__avatar--assistant {
     background: var(--ai-chat-avatar-assistant-bg);
-    color: var(--ai-chat-gradient-start);
+    color: var(--ai-primary);
 }
 
 .ai-chat__bubble {
@@ -1243,7 +1327,7 @@ body.theme-switching *::after {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, var(--ai-chat-gradient-start), var(--ai-chat-gradient-end));
+    background: linear-gradient(135deg, var(--ai-gradient-start), var(--ai-gradient-end));
     color: white;
     border: none;
     border-radius: 50%;
