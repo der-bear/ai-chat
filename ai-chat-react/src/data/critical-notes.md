@@ -12,7 +12,7 @@ This document preserves all the critical nuances and refinements that were devel
 
 ### Processing Sequence Nuances  
 - **Two-part processing**: "I'm creating...now:" → typing delay → "Created successfully"
-- **Typing delay timing**: 800ms (reduced from 1200ms for better UX)
+- **Typing delay timing**: 200ms (optimized for faster response feel)
 - **Detection pattern**: Must end with "now:" AND contain "I'm creating"
 - **No success line in processing start** - only in completion message
 - **Entity links mandatory** in all completion messages: [Name (ID: 12345)](#)

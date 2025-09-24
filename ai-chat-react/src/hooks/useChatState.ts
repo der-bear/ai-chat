@@ -4,7 +4,7 @@ export type { Message, Conversation, ChatState } from '../types/chat';
 
 const DEFAULT_CONFIG: ChatConfig = {
   maxConversations: 50,
-  typingDelay: 1500,
+  typingDelay: 200,
   storageKey: 'aiChatHistory',
   minPanelWidth: 320,
   maxPanelWidth: 600
