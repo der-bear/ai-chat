@@ -1181,6 +1181,9 @@ body.theme-switching *::after {
     --ai-chat-message-user-bg: var(--cui-gray-800, #343a40);  /* Balanced message bg */
     --ai-chat-avatar-assistant-bg: rgba(93, 75, 255, 0.3);
 
+    /* Override purple emphasis color for better contrast in dark mode */
+    --ai-text-emphasis: #9e93ff;  /* Lighter purple for dark mode accessibility */
+
     /* Overlay and modal - dark mode */
     --ai-chat-overlay-bg: rgba(0, 0, 0, 0.6);
 
