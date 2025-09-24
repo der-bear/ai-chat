@@ -1,0 +1,41 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx playwright:*)",
+      "Bash(open:*)",
+      "Bash(node:*)",
+      "WebFetch(domain:coreui.io)",
+      "Bash(npm create:*)",
+      "Bash(npm install)",
+      "Bash(npm install:*)",
+      "Read(//Users/aderkach/Source/**)",
+      "Bash(npm run dev:*)",
+      "Bash(cat:*)",
+      "Bash(pkill:*)",
+      "WebSearch",
+      "WebFetch(domain:platform.openai.com)",
+      "Bash(npm run build:rag:*)",
+      "Bash(OPENAI_API_KEY=$VITE_OPENAI_API_KEY npm run build:rag)",
+      "Bash(find:*)",
+      "Bash(npm audit:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run lint)",
+      "WebFetch(domain:www.figma.com)",
+      "Bash(npm run test:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(curl:*)",
+      "Bash(git pull:*)",
+      "mcp__figma-remote-mcp__get_metadata",
+      "mcp__figma-remote-mcp__get_code",
+      "Bash(git stash:*)",
+      "mcp__figma-remote-mcp__get_screenshot",
+      "Bash(npm run deploy:*)",
+      "Bash(git rm:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
