@@ -1,4 +1,5 @@
 import React from 'react';
+import logoSvg from '../../assets/ai-assist-logo.svg';
 
 interface PanelHeaderProps {
   variant?: 'history' | 'tools' | 'default';
@@ -30,7 +31,7 @@ export const PanelHeader: React.FC<PanelHeaderProps> = ({
   return (
     <div className={`${baseClass} ${className}`}>
       <div className={logoClass}>
-        <img src="/src/assets/ai-assist-logo.svg" alt="" />
+        <img src={logoSvg} alt="" />
       </div>
       <h2 className={titleClass}>
         <span className="ai-text">AI</span>

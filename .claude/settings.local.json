@@ -31,7 +31,9 @@
       "mcp__figma-remote-mcp__get_metadata",
       "mcp__figma-remote-mcp__get_code",
       "Bash(git stash:*)",
-      "mcp__figma-remote-mcp__get_screenshot"
+      "mcp__figma-remote-mcp__get_screenshot",
+      "Bash(npm run deploy:*)",
+      "Bash(git rm:*)"
     ],
     "deny": [],
     "ask": []

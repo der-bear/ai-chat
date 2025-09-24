@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ActionCard } from '../common/ActionCard';
+import logoSvg from '../../assets/ai-assist-logo.svg';
 
 interface ChatInitialProps {
   onSendMessage: (message: string) => void;
@@ -81,7 +82,7 @@ export const ChatInitial: React.FC<ChatInitialProps> = ({ onSendMessage, onFlowT
     <div className="ai-chat__initial">
       <div className="ai-chat__logo-section" role="banner">
         <div className="ai-chat__logo" aria-hidden="true">
-          <img src="/src/assets/ai-assist-logo.svg" alt="" />
+          <img src={logoSvg} alt="" />
         </div>
         <h1 className="ai-chat__title">
           <span className="ai-text">AI</span>
