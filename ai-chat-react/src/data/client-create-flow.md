@@ -4,12 +4,9 @@
 ```
 User: Create new client
 
-Agent: Client details needed:
-• Company name (REQUIRED)
-• Email address (REQUIRED)
-• Contact name (OPTIONAL)
-• Phone number (OPTIONAL)
-• Business address & timezone (OPTIONAL)
+Agent: To create a new client, I'll need the following details:
+• Company name
+• Email address
 
 [Client provides info]
 
@@ -17,11 +14,6 @@ NOTE: Login credentials will be configured if Portal Delivery is selected
 
 DEFAULT Status: Inactive (for testing)
 DEFAULT Automation: Price-based
-DEFAULT Values for optional fields if not provided:
-• Contact name: Uses company name
-• Phone: Empty (optional)
-• Address: Empty (optional)
-• Timezone: PST (Pacific Standard Time)
 ```
 
 ## 2. Delivery Method Selection

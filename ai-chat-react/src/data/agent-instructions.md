@@ -201,12 +201,9 @@ ACTION:
 ```
 User: Create new client
 
-Agent: Client details needed:
-• Company name (REQUIRED)
-• Email address (REQUIRED)
-• Contact name (OPTIONAL - defaults to company name)
-• Phone number (OPTIONAL)
-• Business address & timezone (OPTIONAL - defaults to PST)
+Agent: To create a new client, I'll need the following details:
+• Company name
+• Email address
 
 [Client provides info]
 
@@ -214,11 +211,6 @@ NOTE: Login credentials only needed if Portal Delivery is selected later
 
 DEFAULT Status: Inactive (for testing)
 DEFAULT Automation: Price-based
-DEFAULT Values for optional fields:
-• Contact name: Uses company name if not provided
-• Phone: Empty (optional)
-• Address: Empty (optional)
-• Timezone: PST (Pacific Standard Time)
 ```
 
 #### 2. Delivery Method Selection
@@ -383,25 +375,18 @@ Activate now?
 **REQUIRED FIELDS (from client-create-flow.md)**:
 - **Company Name:** (REQUIRED)
 - **Email Address:** (REQUIRED)
-- **Contact Name:** (OPTIONAL - defaults to company name)
-- **Phone Number:** (OPTIONAL)
-- **Business Address & Timezone:** (OPTIONAL - defaults to PST)
-**NOTE**: Only Company Name and Email are required - all other fields optional
-**EXTRACTION PRIORITY**: Maximum extraction first, minimal questions second
+**NOTE**: Only ask for Company Name and Email - nothing else
+**EXTRACTION PRIORITY**: Extract what's provided, only ask for company and email
 
 ## UNIVERSAL MESSAGE FLOW PATTERN
 
 **STAGE 1 - DATA COLLECTION**:
 - Extract provided information immediately
-- Show: "From your input, I have: [LIST with actual extracted values]"
-- Ask ONLY for missing REQUIRED fields:
-  • **Company Name:** (REQUIRED)
-  • **Email Address:** (REQUIRED)
-- Optional fields can be provided but NOT asked for:
-  • Contact Name (defaults to company name)
-  • Phone Number (optional)
-  • Business Address (optional)
-  • Timezone (optional - defaults to PST)
+- Show: "To create a new client, I'll need the following details:"
+- Ask for:
+  • **Company Name:**
+  • **Email Address:**
+- DO NOT mention or ask for any other fields
 - Follow the exact format from client-create-flow.md
 
 **STAGE 2 - PREVIEW + CONFIRMATION**:
@@ -412,10 +397,6 @@ Activate now?
 |-------|-------|
 | **Company** | [Actual Company Name] |
 | **Email** | [actual email] |
-| **Contact** | [actual contact or company name if not provided] |
-| **Phone** | [actual phone or "Not provided"] |
-| **Address** | [actual address or "Not provided"] |
-| **Timezone** | [actual timezone or "PST"] |
 | **Status** | Inactive (for testing) |
 | **Automation** | Price-based (default) |
 
