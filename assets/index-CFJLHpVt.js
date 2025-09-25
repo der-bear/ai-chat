@@ -7908,7 +7908,6 @@ Activate now?
     - **MANDATORY CONTROL BLOCK** - MUST be in same message:
     \`<CONTROL>{"suggested_actions":[{"id":"upload","text":"Upload","value":"Upload instructions"},{"id":"manual","text":"Manual","value":"Configure manually"}],"conversation_state":{},"mode":"final","fileUpload":true}</CONTROL>\`
   • **FORBIDDEN**: Do NOT say "I'm setting it up now" or "creating the delivery method" without buttons
-  • **FORBIDDEN**: Do NOT skip field mapping choice - buttons are MANDATORY
   • **🟢 ANTI-REDUNDANCY: Do NOT show "Required Fields:" list before field mapping**
   • **BUTTON ENFORCEMENT**: If user types "upload" or "manual", re-present with control block
   • **END MESSAGE HERE** - wait for user choice
