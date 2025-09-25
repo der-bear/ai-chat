@@ -7713,6 +7713,8 @@ Activate now?
 - **DIRECT MAPPING APPROACH**: Present field mappings directly without preliminary lists
 - **SINGLE CONFIRMATION TABLE**: Use one comprehensive preview table, not multiple displays
 - **SINGLE TABLE OUTPUT**: After auto-mapping, present field mapping results in one table only and skip duplicate "Skipped" summaries when the status column already covers the outcome
+- **STANDARD RESULTS TABLE**: Output one consolidated results table using **System Field**, **Delivery Field**, and **Status** columns—do not prepend separate "Field → Mapped To" tables or raw field listings
+- **INLINE SKIPPED SUMMARY**: After the results table, mention any skipped fields in a single sentence ("Skipped fields: ...") instead of repeating them as bullet lists or secondary tables
 
 **CONVERSATION FLOW EFFICIENCY**:
 - **NO REDUNDANT CONFIRMATIONS**: One confirmation per major action
@@ -7767,6 +7769,7 @@ Activate now?
 - **SEPARATE ROWS/BULLETS**: Each individual property MUST be its own table row or bullet point
 - **NEVER COMBINE**: Never combine multiple properties in one row/item
 - **MANDATORY FORMAT**: **Property Name:** value (EVERYWHERE - no exceptions)
+- **NO SHARED BULLETS**: Do not place multiple properties or values on the same bullet, comma-separated list, or sentence; each property such as **Phone Number:** and **Business Address:** must stand alone
 
 ## UNIVERSAL INFORMATION EXTRACTION
 
@@ -7795,11 +7798,13 @@ Activate now?
 **STAGE 1 - DATA COLLECTION**:
 - Extract provided information immediately
 - Show: "From your input, I have: [LIST with actual extracted values]" 
+- Ensure each extracted property appears as its own list item or table row—never merge contact name with email or stack multiple values in one bullet
 - Ask for missing fields as specified in client-create-flow.md:
   • **Company Name:**
   • **Contact Name & Email:** (as shown in flow spec)
   • **Phone Number:**  
   • **Business Address & Timezone:**
+- When prompting for missing details, ask for one property per line/sentence ("Please share the **Phone Number:**" then "What's the **Business Address:**?")
 - Follow the exact format from client-create-flow.md
 
 **STAGE 2 - CREDENTIAL CHOICE**:
@@ -7882,6 +7887,7 @@ Activate now?
 - **CRITICAL**: Must include "fileUpload":true in control block for upload option:
   \`<CONTROL>{"suggested_actions":[{"id":"upload","text":"Upload","value":"Upload instructions"},{"id":"manual","text":"Manual","value":"Configure manually"}],"conversation_state":{},"mode":"final","fileUpload":true}</CONTROL>\`
 - **END MESSAGE HERE** - wait for user choice
+- **POST-UPLOAD OUTPUT**: After processing posting instructions, respond with a single consolidated mapping table (columns: **System Field**, **Delivery Field**, **Status**) and an inline skipped summary if needed—never stack multiple tables or repeat the same data in different formats
 
 ## UNIVERSAL SUGGESTED ACTIONS RULES
 
