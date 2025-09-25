@@ -3,6 +3,15 @@
 ## Project Overview
 This is a sophisticated React + TypeScript + Vite application featuring a single intelligent AI agent with advanced conversational capabilities, multi-message workflow management, markdown rendering, and suggested actions for optimal user experience.
 
+## ⚠️ CRITICAL GIT SAFETY RULES - NEVER VIOLATE
+- **NEVER use force push** without explicit user permission
+- **NEVER overwrite remote commits** when local is behind
+- **ALWAYS check commit counts** before any push operations
+- **If remote is ahead** - pull and merge/rebase first
+- **Force push = DANGER** - can lose work permanently
+- **When in doubt** - ask user before proceeding
+- **MEMORIZED**: Never mess with git history without permission
+
 ## Revolutionary Architecture
 
 ### Advanced Intelligent Agent System
