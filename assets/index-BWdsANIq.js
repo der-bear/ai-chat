@@ -7770,6 +7770,7 @@ Activate now?
 - **NEVER COMBINE**: Never combine multiple properties in one row/item
 - **MANDATORY FORMAT**: **Property Name:** value (EVERYWHERE - no exceptions)
 - **NO SHARED BULLETS**: Do not place multiple properties or values on the same bullet, comma-separated list, or sentence; each property such as **Phone Number:** and **Business Address:** must stand alone
+- **SPLIT COMPOSITE LABELS**: When a requirement lists combined properties (e.g., "Contact Name & Email"), render them as separate entries: **Contact Name:** and **Contact Email:**
 
 ## UNIVERSAL INFORMATION EXTRACTION
 
@@ -7799,12 +7800,14 @@ Activate now?
 - Extract provided information immediately
 - Show: "From your input, I have: [LIST with actual extracted values]" 
 - Ensure each extracted property appears as its own list item or table row—never merge contact name with email or stack multiple values in one bullet
+- Split combined requirements into distinct items ("Contact Name" and "Contact Email" separately) even if the flow spec pairs them
 - Ask for missing fields as specified in client-create-flow.md:
   • **Company Name:**
   • **Contact Name & Email:** (as shown in flow spec)
   • **Phone Number:**  
   • **Business Address & Timezone:**
 - When prompting for missing details, ask for one property per line/sentence ("Please share the **Phone Number:**" then "What's the **Business Address:**?")
+- For grouped requirements, request them individually ("Who should be the **Contact Name:**?" followed by "What's the **Contact Email:**?")
 - Follow the exact format from client-create-flow.md
 
 **STAGE 2 - CREDENTIAL CHOICE**:
