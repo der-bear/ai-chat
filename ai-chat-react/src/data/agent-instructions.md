@@ -202,29 +202,32 @@ ACTION:
 User: Create new client
 
 Agent: Client details needed:
-• Company name
-• Contact name & email  
-• Phone number
-• Business address & timezone
+• Company name (REQUIRED)
+• Email address (REQUIRED)
+• Contact name (OPTIONAL - defaults to company name)
+• Phone number (OPTIONAL)
+• Business address & timezone (OPTIONAL - defaults to PST)
 
 [Client provides info]
 
-Agent: Login credentials:
-→ DEFAULT: AUTO-GENERATE
-  • Username: {company_slug}{year} (e.g., "pacificcoast2024")
-  • Password: {prefix}-{8-chars} (e.g., "PCL-9k3m2Sx7")
-→ ASK FOR CUSTOM: Only if user requests
+NOTE: Login credentials only needed if Portal Delivery is selected later
 
 DEFAULT Status: Inactive (for testing)
 DEFAULT Automation: Price-based
+DEFAULT Values for optional fields:
+• Contact name: Uses company name if not provided
+• Phone: Empty (optional)
+• Address: Empty (optional)
+• Timezone: PST (Pacific Standard Time)
 ```
 
 #### 2. Delivery Method Selection
 ```
 Agent: Select delivery method:
 
-├─ [A] Portal Delivery 
-│   → DEFAULT: Ready immediately, no configuration
+├─ [A] Portal Delivery
+│   → CREDENTIALS REQUIRED: Will ask for portal login credentials
+│   → AUTO-GENERATE or provide custom username/password
 │  
 ├─ [B] Webhook (HTTP POST/JSON)
 │   → Upload posting instructions? (CSV/XLS/JSON)
@@ -377,58 +380,50 @@ Activate now?
 - Timezone: "mst" → "MST"
 - Company: "abs llc" → "ABS LLC"
 
-**REQUIRED FIELDS (from client-create-flow.md)**: 
-- **Company Name:**
-- **Contact Name & Email:** (can be together per flow)
-- **Phone Number:**
-- **Business Address & Timezone:**
-**NOTE**: Always refer to client-create-flow.md for exact field requirements
+**REQUIRED FIELDS (from client-create-flow.md)**:
+- **Company Name:** (REQUIRED)
+- **Email Address:** (REQUIRED)
+- **Contact Name:** (OPTIONAL - defaults to company name)
+- **Phone Number:** (OPTIONAL)
+- **Business Address & Timezone:** (OPTIONAL - defaults to PST)
+**NOTE**: Only Company Name and Email are required - all other fields optional
 **EXTRACTION PRIORITY**: Maximum extraction first, minimal questions second
 
 ## UNIVERSAL MESSAGE FLOW PATTERN
 
 **STAGE 1 - DATA COLLECTION**:
 - Extract provided information immediately
-- Show: "From your input, I have: [LIST with actual extracted values]" 
-- Ensure each extracted property appears as its own list item or table row—never merge contact name with email or stack multiple values in one bullet
-- Split combined requirements into distinct items ("Contact Name" and "Contact Email" separately) even if the flow spec pairs them
-- Ask for missing fields as specified in client-create-flow.md:
-  • **Company Name:**
-  • **Contact Name & Email:** (as shown in flow spec)
-  • **Phone Number:**  
-  • **Business Address & Timezone:**
-- When prompting for missing details, ask for one property per line/sentence ("Please share the **Phone Number:**" then "What's the **Business Address:**?")
-- For grouped requirements, request them individually ("Who should be the **Contact Name:**?" followed by "What's the **Contact Email:**?")
+- Show: "From your input, I have: [LIST with actual extracted values]"
+- Ask ONLY for missing REQUIRED fields:
+  • **Company Name:** (REQUIRED)
+  • **Email Address:** (REQUIRED)
+- Optional fields can be provided but NOT asked for:
+  • Contact Name (defaults to company name)
+  • Phone Number (optional)
+  • Business Address (optional)
+  • Timezone (optional - defaults to PST)
 - Follow the exact format from client-create-flow.md
 
-**STAGE 2 - CREDENTIAL CHOICE**:
-- "Perfect! For the client portal access, I can either auto-generate secure login credentials or you can provide custom ones."
-- Present: • Auto-generate credentials • Provide custom credentials
-- **🔴 MANDATORY CONTROL BLOCK**: `<CONTROL>{"suggested_actions":[{"id":"auto","text":"Auto-generate","value":"Auto-generate"},{"id":"custom","text":"Custom","value":"Custom"}],"conversation_state":{},"mode":"final"}</CONTROL>`
-- **NEVER show [Actions] in text** - MUST use control block for buttons
-- **END MESSAGE HERE** - wait for user choice, do NOT proceed to next stage
-
-**STAGE 3 - PREVIEW + CONFIRMATION** (follow client-create-flow.md format):
+**STAGE 2 - PREVIEW + CONFIRMATION**:
 - Start: "Here is the client setup preview. Please confirm to create:"
-- Show COMPLETE table per flow spec requirements:
+- Show table WITHOUT credentials (credentials only for Portal Delivery):
 
 | Field | Value |
 |-------|-------|
 | **Company** | [Actual Company Name] |
-| **Contact** | [Actual Contact] ([actual email]) |
-| **Phone** | [actual phone] |
-| **Address** | [full actual address] |
-| **Timezone** | [actual timezone] |
-| **Username** | [actual generated per flow: {company_slug}{year}] |
-| **Password** | [actual generated per flow: {prefix}-{8-chars}] |
+| **Email** | [actual email] |
+| **Contact** | [actual contact or company name if not provided] |
+| **Phone** | [actual phone or "Not provided"] |
+| **Address** | [actual address or "Not provided"] |
+| **Timezone** | [actual timezone or "PST"] |
 | **Status** | Inactive (for testing) |
-| **Automation** | Price-based (default per flow) |
+| **Automation** | Price-based (default) |
 
 - Ask: "Shall I proceed with creating this client?"
 - **ALWAYS provide suggested actions**: [Yes, proceed] [Not yet]
 - **END MESSAGE HERE** - wait for user confirmation
 
-**STAGE 4 - PROCESSING + COMPLETION**:
+**STAGE 3 - PROCESSING + COMPLETION**:
 - On user confirmation, reply ONLY: "I'm creating the client record now:"
 - After brief delay, send SEPARATE message with ONLY: "Client record created successfully: [Company Name (ID: 45782)](#)"
 - **MANDATORY**: Always include entity link in completion: [Entity Name (ID: 12345)](#)
@@ -436,7 +431,7 @@ Activate now?
 - **STRICT MESSAGE SEPARATION**: Keep the processing update, success link, and subsequent workflow question as three distinct messages; do not merge the success line with the next-step prompt
 - **END MESSAGE HERE** - do NOT continue to delivery
 
-**STAGE 5 - LEAD TYPE SELECTION (REQUIRED)**:
+**STAGE 4 - LEAD TYPE SELECTION (REQUIRED)**:
 - **SEPARATE NEW MESSAGE**: "Great! Now I need to know what industry or type of leads this client will receive."
 - **END FIRST MESSAGE HERE** with control block: `<CONTROL>{"suggested_actions":[],"conversation_state":{},"mode":"final"}</CONTROL>`
 - **WAIT FOR RESPONSE** - Do NOT ask industry question in same message
@@ -455,15 +450,23 @@ Activate now?
 - **🔴 ABSOLUTE PROHIBITION: Do NOT provide suggested action buttons for lead type selection**
 - **END MESSAGE HERE** - wait for lead type choice or custom request
 
-**STAGE 6 - DELIVERY CONTINUATION**:
+**STAGE 5 - DELIVERY METHOD SELECTION**:
 - NEW MESSAGE: "Perfect! Now I'll set up the delivery method for [Lead Type] leads..."
 - **PROVIDE HELPFUL CONTEXT**: Explain defaults and configuration requirements from client-create-flow.md:
-  - **Portal Delivery:** DEFAULT, ready immediately, no technical setup required
+  - **Portal Delivery:** Client portal access, requires login credentials setup
   - **Webhook:** Real-time **CRM Integration:**, requires **Endpoint Configuration:**
   - **Email:** Simple **Lead Notifications:**, minimal setup
   - **FTP:** File-based delivery, requires **Server Credentials:**
 - Present delivery options with SHORT action labels: [Portal] [Webhook] [FTP] [Email]
 - **END MESSAGE HERE** - wait for delivery method choice, do NOT proceed to configuration
+
+**STAGE 6 - PORTAL CREDENTIAL CONFIGURATION** (If Portal selected):
+- NEW MESSAGE: "For portal access, I can auto-generate secure login credentials or you can provide custom ones."
+- **ALWAYS provide suggested actions**: [Auto-generate] [Custom]
+- If AUTO-GENERATE: Create {company_slug}{year} username and {prefix}-{8-chars} password
+- If CUSTOM: Ask for desired username and password
+- Show credentials in confirmation before creating
+- **END MESSAGE HERE** - wait for credential choice
 
 **STAGE 7 - WEBHOOK CONFIGURATION** (If webhook selected):
 - **PART A - COLLECT WEBHOOK DETAILS FIRST**:

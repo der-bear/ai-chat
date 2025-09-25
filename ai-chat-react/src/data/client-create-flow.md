@@ -5,21 +5,23 @@
 User: Create new client
 
 Agent: Client details needed:
-• Company name
-• Contact name & email  
-• Phone number
-• Business address & timezone
+• Company name (REQUIRED)
+• Email address (REQUIRED)
+• Contact name (OPTIONAL)
+• Phone number (OPTIONAL)
+• Business address & timezone (OPTIONAL)
 
 [Client provides info]
 
-Agent: Login credentials:
-→ DEFAULT: AUTO-GENERATE
-  • Username: {company_slug}{year} (e.g., "pacificcoast2024")
-  • Password: {prefix}-{8-chars} (e.g., "PCL-9k3m2Sx7")
-→ ASK FOR CUSTOM: Only if user requests
+NOTE: Login credentials will be configured if Portal Delivery is selected
 
 DEFAULT Status: Inactive (for testing)
 DEFAULT Automation: Price-based
+DEFAULT Values for optional fields if not provided:
+• Contact name: Uses company name
+• Phone: Empty (optional)
+• Address: Empty (optional)
+• Timezone: PST (Pacific Standard Time)
 ```
 
 ## 2. Delivery Method Selection
@@ -27,8 +29,12 @@ DEFAULT Automation: Price-based
 ```
 Agent: Select delivery method:
 
-├─ [A] Portal Delivery 
-│   → DEFAULT: Ready immediately, no configuration
+├─ [A] Portal Delivery
+│   → DEFAULT: Ready immediately, minimal configuration
+│   → CREDENTIALS REQUIRED:
+│   │   • Username: AUTO-GENERATE {company_slug}{year} (e.g., "pacificcoast2024")
+│   │   • Password: AUTO-GENERATE {prefix}-{8-chars} (e.g., "PCL-9k3m2Sx7")
+│   │   • Or provide custom credentials
 │  
 ├─ [B] Webhook (HTTP POST/JSON)
 │   → Upload posting instructions? (CSV/XLS/JSON)
@@ -98,9 +104,17 @@ Agent: Select delivery method:
 
 ### A. Portal Delivery
 ```
-NO CONFIGURATION NEEDED
-• Access: Client portal with credentials
+CREDENTIALS CONFIGURATION REQUIRED
+• Portal Username: AUTO-GENERATE or custom
+• Portal Password: AUTO-GENERATE or custom
+• Access: Client portal with these credentials
 • Notifications: Email alerts enabled
+
+When Portal Delivery is selected:
+1. Ask: "For portal access, would you like to auto-generate credentials or provide custom ones?"
+2. If AUTO-GENERATE: Create {company_slug}{year} username and secure password
+3. If CUSTOM: Ask for desired username and password
+4. Show credentials in confirmation table before creating
 ```
 
 ### B. Webhook (HTTP POST/JSON) - API Required Fields
