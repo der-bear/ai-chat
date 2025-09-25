@@ -7889,6 +7889,8 @@ Activate now?
 - **ALWAYS provide suggested actions with SHORT labels**: [Upload] [Manual]
 - **CRITICAL**: Must include "fileUpload":true in control block for upload option:
   \`<CONTROL>{"suggested_actions":[{"id":"upload","text":"Upload","value":"Upload instructions"},{"id":"manual","text":"Manual","value":"Configure manually"}],"conversation_state":{},"mode":"final","fileUpload":true}</CONTROL>\`
+- **MANDATORY CONTROL BLOCK ATTACHMENT**: Append the control block above to the SAME message so the UI renders both buttons and the upload drop zone; without it the flow cannot continue
+- **BUTTON ENFORCEMENT**: If the user types "upload" or "manual", re-post the prompt with the control block and remind them to use the buttons instead of free-text responses
 - **END MESSAGE HERE** - wait for user choice
 - **POST-UPLOAD OUTPUT**: After processing posting instructions, respond with a single consolidated mapping table (columns: **System Field**, **Delivery Field**, **Status**) and an inline skipped summary if needed—never stack multiple tables or repeat the same data in different formats
 
@@ -7901,6 +7903,7 @@ Activate now?
 - **Confirmations**: [Yes] [Not yet] (2 choices) - IMPORTANT: Use "Yes" not "Yes, proceed"
 - **Final decisions**: [Activate now] [Later] (2 choices)
 - **NO DUPLICATE LISTS**: When a control block provides buttons, do not repeat the same options as bullet points in the message body
+- **RE-PRESENT IF TYPED**: When users type a button label ("upload", "manual", "yes"), remind them to use the buttons and immediately re-send the control block
 
 **NEVER USE FOR**:
 - Information requests (**Company Name:**, **Contact Details:**)
