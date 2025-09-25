@@ -28,7 +28,7 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({
   return (
     <SearchableList
       items={conversations}
-      title="LeadExec Copilot"
+      title="LeadExec Assist"
       icon="cil-star"
       searchPlaceholder="Search chat sessions..."
       emptyMessage={conversations.length === 0 ? 'No conversations yet' : 'No matching conversations'}

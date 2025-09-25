@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('Test Client Creation Flow', async ({ page }) => {
-  console.log('Testing LeadExec Copilot client creation flow...');
+  console.log('Testing LeadExec Assist client creation flow...');
 
   // Listen for console messages and errors
   const consoleMessages = [];

@@ -1,4 +1,4 @@
-# LeadExec Copilot - Advanced AI Chat Application
+# LeadExec Assist - Advanced AI Chat Application
 
 An intelligent React + TypeScript chat interface featuring a single AI agent with advanced capabilities including multi-message workflow management, markdown rendering, suggested actions, and comprehensive client setup automation.
 

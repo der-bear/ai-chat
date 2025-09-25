@@ -81,7 +81,7 @@ export class IntelligentAgent {
           role: 'system',
           content: this.agentInstructions
             ? `${this.agentInstructions}\n\nCurrent conversation state: ${JSON.stringify(this.conversationState)}`
-            : `You are a LeadExec Copilot. Agent instructions not loaded - using fallback mode.`
+            : `You are a LeadExec Assist. Agent instructions not loaded - using fallback mode.`
         }
       ];
 

@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('LeadExec Copilot Chat Workflow', () => {
+test.describe('LeadExec Assist Chat Workflow', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('http://localhost:5174');
     await page.waitForLoadState('networkidle');
@@ -8,7 +8,7 @@ test.describe('LeadExec Copilot Chat Workflow', () => {
 
   test('should complete full client creation workflow', async ({ page }) => {
     // Test initial screen
-    await expect(page.getByText('LeadExec Copilot')).toBeVisible();
+    await expect(page.getByText('LeadExec Assist')).toBeVisible();
     await expect(page.getByText('Expert client setup and lead delivery specialist')).toBeVisible();
     
     // Test quick action button

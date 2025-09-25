@@ -1,4 +1,4 @@
-# LeadExec Copilot - Claude Instructions & Memory
+# LeadExec Assist - Claude Instructions & Memory
 
 ## Project Overview
 This is an agentic React chat application with two specialized OpenAI agents. The system uses instruction-based flow emulation rather than real API integrations.
@@ -107,7 +107,7 @@ npm run build       # Build for production
 Since we don't have actual tools, the Tools Agent has the complete `client-create-flow.md` document embedded directly in its system prompt context. This ensures exact emulation of workflows:
 
 ```
-You are a LeadExec Copilot specialized in executing tools and performing actions. 
+You are a LeadExec Assist specialized in executing tools and performing actions. 
 Since we don't have actual tools, you must EMULATE the exact workflows described in the documentation.
 
 ## CLIENT CREATION FLOW - EMULATE EXACTLY AS DESCRIBED
@@ -130,7 +130,7 @@ EXACT response format shown above. Do not add extra fields or change the structu
 
 ### Documentation Agent System Message Template
 ```
-You are a LeadExec Copilot specialized in answering questions based on documentation.
+You are a LeadExec Assist specialized in answering questions based on documentation.
 Your role is to:
 1. Answer questions using the provided documentation context
 2. Explain concepts, features, and how-to information

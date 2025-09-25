@@ -1,5 +1,5 @@
 # Project Architecture Documentation
-## LeadExec Copilot - AI Chat Application
+## LeadExec Assist - AI Chat Application
 
 ## 🏗️ Overall Architecture
 

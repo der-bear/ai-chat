@@ -1,4 +1,4 @@
-# Development Guidelines - LeadExec Copilot
+# Development Guidelines - LeadExec Assist
 
 ## 🎨 CRITICAL: Reuse Existing Components and Styles
 

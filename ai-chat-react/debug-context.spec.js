@@ -121,7 +121,7 @@ test('Debug Context Loading', async ({ page }) => {
               console.log(`    Message ${msgIndex + 1}: ${msg.role} (${msg.content?.length || 0} chars)`);
               if (msg.role === 'developer' && msg.content) {
                 const hasClientFlow = msg.content.includes('Client Creation Flow');
-                const hasKnowledgeBase = msg.content.includes('LeadExec Copilot Documentation');
+                const hasKnowledgeBase = msg.content.includes('LeadExec Assist Documentation');
                 console.log(`      Contains Client Flow: ${hasClientFlow ? '✅' : '❌'}`);
                 console.log(`      Contains Knowledge Base: ${hasKnowledgeBase ? '✅' : '❌'}`);
                 if (msg.content.length > 0) {

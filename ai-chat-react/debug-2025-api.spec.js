@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('Debug 2025 API Implementation', async ({ page }) => {
-  console.log('🧪 Testing LeadExec Copilot with 2025 OpenAI best practices...');
+  console.log('🧪 Testing LeadExec Assist with 2025 OpenAI best practices...');
 
   const consoleMessages = [];
   const errors = [];
