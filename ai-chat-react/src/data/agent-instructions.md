@@ -370,11 +370,13 @@ Activate now?
 **STAGE 1 - DATA COLLECTION**:
 - Extract provided information immediately
 - Show: "From your input, I have: [LIST with actual extracted values]" 
+- Ensure each extracted property appears as its own list item or table row—never merge contact name with email or stack multiple values in one bullet
 - Ask for missing fields as specified in client-create-flow.md:
   • **Company Name:**
   • **Contact Name & Email:** (as shown in flow spec)
   • **Phone Number:**  
   • **Business Address & Timezone:**
+- When prompting for missing details, ask for one property per line/sentence ("Please share the **Phone Number:**" then "What's the **Business Address:**?")
 - Follow the exact format from client-create-flow.md
 
 **STAGE 2 - CREDENTIAL CHOICE**:
