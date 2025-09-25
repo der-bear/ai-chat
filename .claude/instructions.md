@@ -10,7 +10,20 @@ This is a sophisticated React + TypeScript + Vite application featuring a single
 - **If remote is ahead** - pull and merge/rebase first
 - **Force push = DANGER** - can lose work permanently
 - **When in doubt** - ask user before proceeding
-- **MEMORIZED**: Never mess with git history without permission
+- **NEVER COMMIT without user explicitly asking** - only stage changes
+- **MEMORIZED**: Never mess with git history or commit without permission
+
+## 📦 DEPLOYMENT PROCESS - MEMORIZED
+- **Automatic deployment via GitHub Actions** on push to main
+- **Workflow steps**:
+  1. GitHub Actions triggers on push
+  2. Builds RAG index using OPENAI_API_KEY from GitHub secrets
+  3. Builds production React app
+  4. Deploys to GitHub Pages automatically
+- **Deployment URL**: https://der-bear.github.io/ai-chat/
+- **Time**: Usually completes in 1-2 minutes
+- **No manual deployment needed** - just git push
+- **Check status**: GitHub Actions tab in repository
 
 ## Revolutionary Architecture
 
